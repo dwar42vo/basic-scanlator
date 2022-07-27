@@ -49,15 +49,15 @@ The script takes 4 arguments, which are "Source Language", "Target Language", "T
 
 The valid values for each of these are:
 
-1) Source Language: jp (Japanese), zh (Simplified Chinese) and ko (Korean)
+1. Source Language: jp (Japanese), zh (Simplified Chinese) and ko (Korean)
     
-2) Target Language: en (English) and any ohter language supported by each of the Translation Engines
+2. Target Language: en (English) and any ohter language supported by each of the Translation Engines
     
-3) Translation Engine: google and deepl
+3. Translation Engine: google and deepl
     
-4) Mode: interactive (default), automatic, ocr-only, typeset-from-file and interactive-typeset-from-file
+4. Mode: interactive (default), automatic, ocr-only, typeset-from-file and interactive-typeset-from-file
     
-    a) Interactive: Requests user input for a number of thing, namely changing either the extracted raw text or the translated text before typesetting, setting new offset for text boxes and font sizes. 
+   - a) Interactive: Requests user input for a number of thing, namely changing either the extracted raw text or the translated text before typesetting, setting new offset for text boxes and font sizes. 
         
     b) Automatic: Runs without any user input. Extracts raw text, translates and typeset results.
         
