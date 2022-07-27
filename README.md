@@ -22,7 +22,7 @@ These last two should be installed on C:\Program Files
 
 ## Command Line
 
-grep v3+, curl and jq can be installed with the following commands on debian based distros.
+grep v3+, curl and jq can be installed with the following commands on Debian based distros:
 
 ```
 apt-get update && apt-get upgrade (don't run if you're using the built-in MobaXterm Cygwin)
@@ -49,20 +49,20 @@ The script takes 4 arguments, which are "Source Language", "Target Language", "T
 
 The valid values for each of these are:
 
-    1) Source Language: jp (Japanese), zh (Simplified Chinese) and ko (Korean)
+1) Source Language: jp (Japanese), zh (Simplified Chinese) and ko (Korean)
     
-    2) Target Language: en (English) and any ohter language supported by each of the Translation Engines
+2) Target Language: en (English) and any ohter language supported by each of the Translation Engines
     
-    3) Translation Engine: google and deepl
+3) Translation Engine: google and deepl
     
-    4) Mode: interactive (default), automatic, ocr-only, typeset-from-file and interactive-typeset-from-file
+4) Mode: interactive (default), automatic, ocr-only, typeset-from-file and interactive-typeset-from-file
     
-        a) Interactive: Requests user input for a number of thing, namely changing either the extracted raw text or the translated text before typesetting, setting new offset for text boxes and font sizes. 
+    a) Interactive: Requests user input for a number of thing, namely changing either the extracted raw text or the translated text before typesetting, setting new offset for text boxes and font sizes. 
         
-        b) Automatic: Runs without any user input. Extracts raw text, translates and typeset results.
+    b) Automatic: Runs without any user input. Extracts raw text, translates and typeset results.
         
-        c) OCR Only: Only extracts raw text to a file named rawtext.txt.
+    c) OCR Only: Only extracts raw text to a file named rawtext.txt.
         
-        d) Typeset from File: Uses a text file named transtext.txt as the translated text.
+    d) Typeset from File: Uses a text file named transtext.txt as the translated text.
         
-        e) Interactive Typeset from File: A combination of a) and d).
+    e) Interactive Typeset from File: A combination of a) and d).
