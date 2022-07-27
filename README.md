@@ -74,7 +74,9 @@ The valid values for each of these are:
 
 # Usage
 
-First off, place the script on the same folder as the manga or webtoon JPG images you wish to process, and then run the script with the intended arguments. The order the arguments should follow is:
+First off, place the script on the same folder as the manga or webtoon JPG images you wish to process, and then run the script with the intended arguments. 
+
+The order the arguments should follow is:
 
 ```
 ./basic_scanlator.sh [Source Language] [Target Language] [Translation Engine] (Mode)
