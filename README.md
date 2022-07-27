@@ -76,7 +76,7 @@ The valid values for each of these are:
 
 First, place the script on the same folder as the manga or webtoon jpg images you wish to process. Then run the script with the intended arguments. 
 
-For example, if you wish to translate a Korean webtoon interatively:
+For example, if you wish to translate a Korean webtoon to English interactively:
 
 ```
 ./basic_scanlator.sh ko en google
