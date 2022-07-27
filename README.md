@@ -8,7 +8,7 @@ This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 
 
 # Prerequites
 
-Operating System
+## Operating System
 
 WSDL with Ubuntu 18.04 or 20.04 installed or MobaXterm (https://mobaxterm.mobatek.net/download-home-edition.html) [e.g. MobaXterm_Installer_v22.1.zip]
 
@@ -18,24 +18,28 @@ JPEGView (https://sourceforge.net/projects/jpegview/files/latest/download) [e.g.
 
 These should be installed on C:\Program Files
 
-Command Line
+## Command Line
 
-grep v3+
-curl
-jq
+>grep v3+
+>curl
+>jq
 
 These can be installed with:
 
+```
 apt-get update && apt-get upgrade 
 apt-get install coreutils grep curl jq
+```
 
 Also, make sure you have bash v4+ installed.
 
+```
 bash -version
+```
 
-Script
+## Script
 
 Add your google and your deepl api keys to following variables at top of the script.
 
-gc_api_key="..."
-deepl_api_key="..."
+>gc_api_key="..."
+>deepl_api_key="..."
