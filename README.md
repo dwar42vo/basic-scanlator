@@ -29,7 +29,7 @@ These last two should be installed on C:\Program Files
 grep v3+, curl and jq can be installed with the following commands on Debian based distros:
 
 ```
-apt-get update && apt-get upgrade (don't run if you're using the built-in MobaXterm Cygwin)
+apt-get update && apt-get upgrade (don't run this if you're using the built-in MobaXterm Cygwin)
 apt-get install coreutils grep curl jq
 ```
 
