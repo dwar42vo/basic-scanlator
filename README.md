@@ -2,7 +2,7 @@
 
 This repo is currently under construction...
 
-A basic bash script that extracts raw text using Google Vision API from a list of manga or webtoon jpg images, translates the extracted raw text using Google Translate API or Deepl Translate API and typesets the result onto the images. 
+A basic bash script that extracts raw text using Google Vision API from a list of manga or webtoon JPG images, translates the extracted raw text using Google Translate API or Deepl Translate API and typesets the result onto the images. 
 
 This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 (will probably also work on WSL 2) installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided; you must obtain them yourself by creating a free Google Cloud and Deepl accounts.
 
@@ -74,7 +74,7 @@ The valid values for each of these are:
 
 # Usage
 
-First, place the script on the same folder as the manga or webtoon jpg images you wish to process. Then run the script with the intended arguments. 
+First, place the script on the same folder as the manga or webtoon JPG images you wish to process. Then run the script with the intended arguments. 
 
 For example, if you wish to translate a Korean webtoon to English interactively:
 
