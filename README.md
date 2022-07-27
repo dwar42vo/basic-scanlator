@@ -43,9 +43,17 @@ bash -version
 
 Add your google and your deepl api keys to the gc_api_key and deepl_api_key variables at top of the script. 
 
->gc_api_key="your-google-api-key"
+>gc_api_key="your-google-api-key" --> gc_api_key=""
 >
->deepl_api_key="your-deepl-api-key"
+>deepl_api_key="your-deepl-api-key" --> deepl_api_key="279a2e9d-83b3-c416-7e2d-f721593e42a0:fx"
+
+## API
+
+Google Cloud: https://console.cloud.google.com/freetrial
+
+Deepl: https://www.deepl.com/pro-checkout/account?productId=1200&yearly=false&trial=false
+
+Note: You need a Gmail account to register on Google Cloud. 
 
 # Features
 
@@ -55,7 +63,7 @@ The valid values for each of these are:
 
 1. Source Language: jp (Japanese), zh (Simplified Chinese) and ko (Korean)
     
-2. Target Language: en (English) and any other language supported by each of the Translation Engines
+2. Target Language: en (English) and any other language supported by each of the Translation Engines. Read their repective documents to find out which are currently supported. Google: https://cloud.google.com/translate/docs/languages Deepl: https://www.deepl.com/docs-api/translating-text/
     
 3. Translation Engine: google and deepl
     
