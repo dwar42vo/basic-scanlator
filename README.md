@@ -1,7 +1,5 @@
 # Introduction
 
-This repo is currently under construction...
-
 A basic bash script that extracts raw text using Google Vision API from a list of manga or webtoon JPG images, translates the extracted raw text using Google Translate API or Deepl Translate API and typesets the result onto the images. 
 
 This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 (will probably also work on WSL 2) installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided; you must obtain them yourself by creating a free Google Cloud and Deepl accounts.
@@ -43,7 +41,7 @@ bash -version
 
 Add your google and your deepl api keys to the gc_api_key and deepl_api_key variables at top of the script. 
 
->gc_api_key="your-google-api-key" --> gc_api_key=""
+>gc_api_key="your-google-api-key" --> gc_api_key="a4db08b7-5729-4ba9-8c08-f2df493465a1"
 >
 >deepl_api_key="your-deepl-api-key" --> deepl_api_key="279a2e9d-83b3-c416-7e2d-f721593e42a0:fx"
 
@@ -73,7 +71,7 @@ Deepl: https://www.deepl.com/pro-checkout/account?productId=1200&yearly=false&tr
 
 Once you have registered:
 
-Go to Account -> Account and under Authentication Key for DeepL API copy & paste your API key to the script.
+    Go to Account -> Account and under Authentication Key for DeepL API, copy & paste your API key to the script.
 
 # Features
 
@@ -98,7 +96,6 @@ The valid values for each of these are:
     - Typeset from File: Uses a text file named transtext.txt as the translated text. The translated strings on the file should follow the order by which Google Vision Api extracts text and not the order of the various text bubbles.
         
     - Interactive Typeset from File: A combination of Interactive and Typeset from File.
-
 
 # Usage
 
