@@ -21,7 +21,9 @@ These should be installed on C:\Program Files
 ## Command Line
 
 >grep v3+
+
 >curl
+
 >jq
 
 These can be installed with:
@@ -42,4 +44,5 @@ bash -version
 Add your google and your deepl api keys to following variables at top of the script.
 
 >gc_api_key="..."
+
 >deepl_api_key="..."
