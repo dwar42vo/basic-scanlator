@@ -51,9 +51,29 @@ Add your google and your deepl api keys to the gc_api_key and deepl_api_key vari
 
 Google Cloud: https://console.cloud.google.com/freetrial
 
+Once you have registered:
+
+1) Go to APIs & Services -> Enabled APIs & Services and click on Enable APIs & Services. 
+
+2) Search for Cloud Vision API and Cloud Translation API and click on the Enable button.
+
+3) Go to APIs & Services -> Credentials and click Create Credentials -> API Key.
+
+4) (Opcional) Under the API Keys tab, click on the new generated key to edit it. 
+
+    - Set Application restrictions to IP addresses and add your public IP.
+    
+    - Set API restrictions to Restricted and select Cloud Vision API and Cloud Translation API.
+    
+5) Finally, copy & paste your API key to the script.
+    
+Note: You need a Gmail account to register on Google Cloud. 
+
 Deepl: https://www.deepl.com/pro-checkout/account?productId=1200&yearly=false&trial=false
 
-Note: You need a Gmail account to register on Google Cloud. 
+Once you have registered:
+
+Go to Account -> Account and under Authentication Key for DeepL API copy & paste your API key to the script.
 
 # Features
 
