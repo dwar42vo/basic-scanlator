@@ -2,17 +2,21 @@
 
 This repo is currently under construction...
 
-A basic bash script that extracts raw text using Google Vision Api from a list of manga or webtoon jpg images, translates the extracted raw text using Google Translate Api or Deepl Translate Api and typesets the translated text onto the images. 
+A basic bash script that extracts raw text using Google Vision Api from a list of manga or webtoon jpg images, translates the extracted raw text using Google Translate Api or Deepl Translate Api and typesets the result onto the images. 
 
 This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 (will probably also work on WSL 2) installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided; you must obtain them yourself by creating a free google cloud and deepl accounts.
 
-This script only supports Japanese, Chinese and Korean as source languages. This script is very much a WIP. Unintended results are to be expected.
+This script only supports Japanese, Chinese and Korean as source languages. The font used by this script is CC Wild Words Roman, but you can change it to any font you have installed on your system. 
+
+Lastly, this script is very much a WIP. Unintended results are to be expected.
 
 # Prerequites
 
 ## Operating System
 
 WSL with Ubuntu 18.04 or 20.04 installed, Cywin (https://www.cygwin.com/) [setup-x86_64.exe] or MobaXterm (https://mobaxterm.mobatek.net/download-home-edition.html) [e.g. MobaXterm_Installer_v22.1.zip]
+
+CC Wild Words (https://freefontsfamily.com/cc-wild-words-roman-font-free/) [CC Wild Words Roman.ttf]
 
 Image Magick v7+ (https://imagemagick.org/script/download.php) [e.g. ImageMagick-7.1.0-portable-Q16-x64.zip]
 
@@ -43,7 +47,7 @@ Add your google and your deepl api keys to the gc_api_key and deepl_api_key vari
 >
 >deepl_api_key="your-deepl-api-key"
 
-# Usage
+# Features
 
 The script takes 4 arguments, which are "Source Language", "Target Language", "Translation Engine" and "Mode". Mode is opcional. 
 
@@ -57,12 +61,23 @@ The valid values for each of these are:
     
 4. Mode: interactive (default), automatic, ocr-only, typeset-from-file and interactive-typeset-from-file
     
-   - a) Interactive: Requests user input for a number of thing, namely changing either the extracted raw text or the translated text before typesetting, setting new offset for text boxes and font sizes. 
+    - Interactive: Requests user input for a number of thing, namely changing either the extracted raw text or the translated text before typesetting, setting new offset values for text boxes and font sizes. 
         
-    b) Automatic: Runs without any user input. Extracts raw text, translates and typeset results.
+    - Automatic: Runs without any user input. Extracts raw text, translates and typeset results.
         
-    c) OCR Only: Only extracts raw text to a file named rawtext.txt.
+    - OCR Only: Only extracts raw text to a file named rawtext.txt.
         
-    d) Typeset from File: Uses a text file named transtext.txt as the translated text.
+    - Typeset from File: Uses a text file named transtext.txt as the translated text. The translated strings on the file should follow the order by which Google Vision Api extracts text and not the order of the various text bubbles.
         
-    e) Interactive Typeset from File: A combination of a) and d).
+    - Interactive Typeset from File: A combination of Interactive and Typeset from File.
+
+
+# Usage
+
+First, place the script on the same folder as the manga or webtoon jpg images you wish to process. Then run the script with the intended arguments. 
+
+For example, if you wish to translate a Korean webtoon interatively:
+
+```
+./basic_scanlator.sh ko en google
+```
