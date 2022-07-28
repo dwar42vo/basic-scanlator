@@ -73,6 +73,14 @@ Once you have registered:
 
 1. Go to Account -> Account and under Authentication Key for DeepL API, copy & paste your API key to the script.
 
+# Componets
+
+basic_scanlator.sh: Version without ruler support.
+
+basic_scanlator_beta.sh: Version with ruler support.
+
+ruler.ong: A 500px ruler. The distance represented by each tick mark, from longest to shortest, is 50px, 10px and 5px.
+
 # Features
 
 The script takes 4 arguments, which are "Source Language", "Target Language", "Translation Engine" and "Mode". Mode is optional. 
