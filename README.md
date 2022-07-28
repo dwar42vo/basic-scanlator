@@ -73,7 +73,7 @@ Once you have registered:
 
 1. Go to Account -> Account and under Authentication Key for DeepL API, copy & paste your API key to the script.
 
-# Componets
+# Components
 
 >basic_scanlator.sh: Version without ruler support.
 
