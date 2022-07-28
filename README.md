@@ -121,6 +121,3 @@ For example, if you wish to translate a Korean webtoon to English interactively:
 ./basic_scanlator.sh ko en google
 ```
 
-https://user-images.githubusercontent.com/110120271/181624694-e7858d8c-92ac-4b12-813c-1ceddf0efde1.mp4
-
-
