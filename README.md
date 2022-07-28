@@ -57,7 +57,7 @@ Once you have registered:
 
 3. Go to APIs & Services -> Credentials and click Create Credentials -> API Key.
 
-4. (Opcional) Under the API Keys tab, click on the new generated key to edit it. 
+4. (Optional) Under the API Keys tab, click on the new generated key to edit it. 
 
     - Set Application restrictions to IP addresses and add your public IP.
     
@@ -81,25 +81,25 @@ The valid values for each of these are:
 
 1. Source Language: jp (Japanese), zh (Simplified Chinese) and ko (Korean)
     
-2. Target Language: en (English) and any other language supported by each of the Translation Engines. Read their repective documents to find out which are currently supported. Google: https://cloud.google.com/translate/docs/languages Deepl: https://www.deepl.com/docs-api/translating-text/
+2. Target Language: en (English) and any other language supported by each of the Translation Engines. Read their respective documentations to find out which are currently supported. Google: https://cloud.google.com/translate/docs/languages Deepl: https://www.deepl.com/docs-api/translating-text/
     
 3. Translation Engine: google and deepl
     
 4. Mode: interactive (default), automatic, ocr-only, typeset-from-file and interactive-typeset-from-file
     
-    - Interactive: Requests user input for a number of thing, namely changing either the extracted raw text or the translated text before typesetting, setting new offset values for text boxes and font sizes. 
+    - Interactive: Requests user input for a number of things, namely changing either the extracted raw text or the translated text before typesetting, setting new offset values for text boxes and font sizes. 
         
     - Automatic: Runs without any user input. Extracts raw text, translates and typeset results.
         
     - OCR Only: Only extracts raw text to a file named rawtext.txt.
         
-    - Typeset from File: Uses a text file named transtext.txt as the translated text. The translated strings on the file should follow the order by which Google Vision Api extracts text and not the order of the various text bubbles.
+    - Typeset from File: Uses a text file named transtext.txt as the translated text. The translated strings on the file should follow the order by which Google Vision API extracts text and not the order of the various text bubbles.
         
     - Interactive Typeset from File: A combination of Interactive and Typeset from File.
 
 # Usage
 
-First off, place the script on the same folder as the manga or webtoon JPG images you wish to process, and then run the script with the intended arguments. 
+First off, place the script on the same folder as the manga or webtoon JPG images you wish to process, and then run the script with the intended arguments. If you're running the beta version, you will also need to place the ruler.png file on the same folder as the script and images.
 
 The order the arguments should follow is:
 
