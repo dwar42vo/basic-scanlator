@@ -117,7 +117,7 @@ The order the arguments should follow is:
 
 ## Examples 
 
-If you wish to translate a Japonese to English interactively:
+If you wish to translate a Japanese manga to English interactively, run:
 
 ```
 ./basic_scanlator.sh jp en deepl
@@ -127,7 +127,7 @@ If you wish to translate a Japonese to English interactively:
 https://user-images.githubusercontent.com/110120271/181649471-15220046-9bfa-4c02-aa83-957bfe0fb84c.mp4
 
 
-Or if you wish to translate a Korean webtoon to English with your own translation, create file named transtext.txt and add in your translated text. This file cannot contain carriage return characters. You can use Notepad++ to convert the end of lines to Linux format if needed (Edit -> EOL Converversion -> Unix). If you type the word "ignore" on the transtext.txt file the text block the script is currently on will be skipped. This is useful to avoid SFX.
+If you wish to translate a Korean webtoon to English with your own translation, create file named transtext.txt, place ot on the same folder as the script and the JPG images you wish to process and add in your translated text. This file cannot contain any carriage return characters. You can use Notepad++ to convert the end of lines to Linux format if needed (Edit -> EOL Converversion -> Unix). If you type the word "ignore" on the transtext.txt file, the text block the script is currently on will be skipped; this is useful to avoid SFX.
 
 ```
 ./basic_scanlator.sh ko en google typeset-from-file
