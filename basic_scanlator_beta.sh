@@ -28,7 +28,7 @@ fi
 
 if [[ $mode != "interactive" ]] && [[ $mode != "automatic" ]] && [[ $mode != "ocr-only" ]] && [[ $mode != "typeset-from-file" ]] && [[ $mode != "interactive-typeset-from-file" ]]
 then
-	echo "Invalid Operation Mode."
+	echo "Invalid operation mode."
 	exit 2
 fi
 
@@ -40,7 +40,7 @@ fi
 
 if [[ $transengine != "google" ]] && [[ $transengine != "deepl" ]]
 then
-	echo "Invalid Translation Engine."
+	echo "Invalid translation engine."
 	exit 2
 fi
 
@@ -50,7 +50,7 @@ then
 	exit 2
 fi
 
-if [[ $sourcelang == "jp" ]] && [[ $transengine == "deepl" ]]
+if [[ $sourcelang == "jp" ]]
 then
 	sourcelang="ja"
 fi
@@ -60,9 +60,26 @@ then
 	targetlang="en-gb"
 fi
 
-transstringcount=0
+if [[ $mode == "typeset-from-file" ]] || [[ $mode == "interactive-typeset-from-file" ]]
+then
+	if [[ ! -f transtext.txt ]]
+	then
+		echo "transtext.txt does not exist."
+		exit 2
+	fi
+fi
+
+if [[ ! -f ruler.png ]]
+then
+	echo "Could not find ruler.png"
+	exit 2
+fi
 
 [[ -f rawtext.txt ]] && rm rawtext.txt
+
+[[ -f read.html ]] && rm read.html
+
+transstringcount=0
 
 for img in $(ls -v *.jpg)
 do
@@ -146,10 +163,12 @@ do
 			y3b="$y3bn"
 			
 		else
+		
 			x1b="$x1bn"
 			x3b="$x3bn"
 			y1b="$y1bn"
 			y3b="$y3bn"
+			
 		fi
 		
 	fi
@@ -305,13 +324,26 @@ do
 	
 		if [[ $mode == "typeset-from-file" ]] || [[ $mode == "interactive-typeset-from-file" ]]
 		then
+		
 			echo "Using user provided translated string."
-			transstringcount=$(( $transstringcount +1 ))
+			transstringcount=$(( $transstringcount + 1 ))
 			transstring=$(cat transtext.txt | tail -n +$transstringcount | head -n +1)
+			
+			if [[ $transstring == "Ignore" ]] || [[ $transstring == "ignore" ]]
+			then
+				sleep 1
+				mv $imgconvtmp $imgconv
+				i=$(($i+1))
+				echo "Ignoring as per user input."
+				continue
+			fi
+			
 		else
+		
 			echo -e "{\n \"q\": \"$rawstring\",\n \"source\": \"$sourcelang\",\n \"target\": \"$targetlang\",\n \"format\": \"text\"\n}" > transresquest.json
 			echo "Translating raw string... "
 			transstring=$(curl -s -X POST -H "X-Goog-Api-Key: $gc_api_key" -H "Content-Type: application/json; charset=utf-8" -d @transresquest.json "https://translation.googleapis.com/language/translate/v2" | jq '.data.translations[].translatedText' | sed 's/\"//g' | sed 's/\\//g')
+			
 		fi
 	fi
 	
@@ -319,12 +351,25 @@ do
 	then
 		if [[ $mode == "typeset-from-file" ]] || [[ $mode == "interactive-typeset-from-file" ]]
 		then
+		
 			echo "Using user provided translated string."
-			transstringcount=$(( $transstringcount +1 ))
+			transstringcount=$(( $transstringcount + 1 ))
 			transstring=$(cat transtext.txt | tail -n +$transstringcount | head -n +1)
+			
+			if [[ $transstring == "Ignore" ]] || [[ $transstring == "ignore" ]]
+			then
+				sleep 1
+				mv $imgconvtmp $imgconv
+				i=$(($i+1))
+				echo "Ignoring as per user input."
+				continue
+			fi
+			
 		else
+		
 			echo "Translating raw string... "
 			transstring=$(curl -s "https://api-free.deepl.com/v2/translate" -d "auth_key=$deepl_api_key" -d "text=$rawstring" -d "source_lang=$sourcelang" -d "target_lang=$targetlang" | jq '.translations[].text' | sed 's/\"//g' | sed 's/\\//g')
+			
 		fi
 	fi
 	
@@ -367,7 +412,7 @@ do
 			while true
 			do
 
-				read -e -p "Do you wish to finish typesetting and proceed (y/n)? " string
+				read -e -p "Do you wish to proceed to the next text bubble (y/n)? " string
 		
 				if [[ $string == Y ]] || [[ $string == y ]] || [[ $string == Yes ]] || [[ $string == yes ]]
 				then
@@ -420,7 +465,7 @@ do
 								fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font CC-Wild-Words-Roman -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
 								echo "Font size $fontsize automatically selected as best fit."
 						
-								read -e -p "Do you wish to finish editing the text box (y/n)? " string
+								read -e -p "Do you wish to continue (y/n)? " string
 		
 								if [[ $string == Y ]] || [[ $string == y ]] || [[ $string == Yes ]] || [[ $string == yes ]]
 								then
@@ -430,7 +475,7 @@ do
 								elif [[ $string != N ]] && [[ $string != n ]] && [[ $string != No ]] && [[ $string != no ]]
 								then
 								
-									echo "Invalid string."
+									echo "Invalid option."
 									break
 				
 								else
@@ -496,4 +541,23 @@ done
 done
 
 echo "All images have been successfully processed."
+
+echo "Generating read.html... "
+
+echo -e "<html>\n<body bgcolor=0>\n<center>" >> read.html
+ 
+for image in $(ls -v *.png) 
+do 
+	echo "<img src=./$image><br>" >> read.html 
+done
+
+echo -e "</center>\n</body>\n</html>" >> read.html
+
+sed -i '/ruler.png/d' read.html
+
+curdir="$(echo $(pwd) | sed 's/\//\\/g' | cut -c 6):$(echo $(pwd) | sed 's/\//\\/g' | cut -c 7-)"
+
+[[ -f "/mnt/c/Program Files (x86)/Mozilla Firefox"/firefox.exe ]] && "/mnt/c/Program Files (x86)/Mozilla Firefox"/firefox.exe file:///"$curdir"/read.html || echo "Could not find Firefox browser."
+
+exit 1
 
