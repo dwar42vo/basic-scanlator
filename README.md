@@ -115,14 +115,26 @@ The order the arguments should follow is:
 ./basic_scanlator.sh [Source Language] [Target Language] [Translation Engine] (Mode)
 ```
 
-For example, if you wish to translate a Korean webtoon to English interactively:
+## Examples 
+
+If you wish to translate a Japonese to English interactively:
 
 ```
-./basic_scanlator.sh ko en google
+./basic_scanlator.sh jp en deepl
 ```
 
 
 https://user-images.githubusercontent.com/110120271/181649471-15220046-9bfa-4c02-aa83-957bfe0fb84c.mp4
+
+
+Or if you wish to translate a Korean webtoon to English with your own translation, create file named transtext.txt and add in your translated text. This file cannot contain carriage return characters. You can use Notepad++ to convert the end of lines to Linux format if needed (Edit -> EOL Converversion -> Unix). If you type the word "ignore" on the transtext.txt file the text block the script is currently on will be skipped. This is useful to avoid SFX.
+
+```
+./basic_scanlator.sh ko en google typeset-from-file
+```
+
+
+https://user-images.githubusercontent.com/110120271/181768039-b538a0cc-c13f-4564-a324-ab3dc635ddc3.mp4
 
 
 
