@@ -75,9 +75,7 @@ Once you have registered:
 
 # Components
 
->basic_scanlator.sh: Version without ruler support.
-
->basic_scanlator_beta.sh: Version with ruler support.
+>basic_scanlator.sh
 
 >ruler.png: A 500px ruler. The distance represented by each tick mark, from longest to shortest, is 50px, 10px and 5px.
 
