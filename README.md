@@ -59,9 +59,11 @@ Once you have done so:
     
 5) Finally, copy & paste your API key to the script.
 
+
 Pricing:
 
 https://cloud.google.com/vision/pricing
+
 https://cloud.google.com/translate/pricing
 
 According to the documentation, the first 1 000 requests per month to the Google Cloud Vision API, and the first 500 000 characters per month to the Google Cloud Translate API are free.
@@ -73,6 +75,7 @@ Register at https://www.deepl.com/pro-checkout/account?productId=1200&yearly=fal
 Once you have done so:
 
 1. Go to Account -> Account and under Authentication Key for DeepL API, copy & paste your API key to the script.
+
 
 Pricing:
 
