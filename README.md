@@ -39,9 +39,11 @@ bash -version
 
 ## API
 
-Google Cloud: https://console.cloud.google.com/freetrial
+### Google Cloud
 
-Once you have registered:
+Register at https://console.cloud.google.com/freetrial
+
+Once you have done so:
 
 1. Go to APIs & Services -> Enabled APIs & Services and click on Enable APIs & Services. 
 
@@ -56,14 +58,25 @@ Once you have registered:
     - Set API restrictions to Restricted and select Cloud Vision API and Cloud Translation API.
     
 5) Finally, copy & paste your API key to the script.
-    
-Note: You need a Gmail account to register on Google Cloud. 
 
-Deepl: https://www.deepl.com/pro-checkout/account?productId=1200&yearly=false&trial=false
+Pricing:
 
-Once you have registered:
+https://cloud.google.com/vision/pricing
+https://cloud.google.com/translate/pricing
+
+According to the documentation, the first 1 000 requests per month to the Google Cloud Vision API, and the first 500 000 characters per month to the Google Cloud Translate API are free.
+
+### Deepl 
+
+Register at https://www.deepl.com/pro-checkout/account?productId=1200&yearly=false&trial=false
+
+Once you have done so:
 
 1. Go to Account -> Account and under Authentication Key for DeepL API, copy & paste your API key to the script.
+
+Pricing:
+
+Unlike Google Cloud, you don't have to worry about credit card charges.
 
 ## Script
 
@@ -135,6 +148,7 @@ If you wish to translate a Korean webtoon to English with your own translation, 
 
 
 https://user-images.githubusercontent.com/110120271/181768039-b538a0cc-c13f-4564-a324-ab3dc635ddc3.mp4
+
 
 
 
