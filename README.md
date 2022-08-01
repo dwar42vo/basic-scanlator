@@ -81,7 +81,7 @@ Add your google and your deepl api keys to the gc_api_key and deepl_api_key vari
 
 # Features
 
-The script takes 4 arguments, which are "Source Language", "Target Language", "Translation Engine" and "Mode". Mode is optional. 
+The script takes 6 arguments, which are "Source Language", "Target Language", "Translation Engine", "Mode", "Font" and "Translation File". Mode, Font and Translation File are optional. 
 
 The valid values for each of these are:
 
@@ -103,7 +103,7 @@ The valid values for each of these are:
         
     - Typeset from file: Uses a text file named transtext.txt as the translated text. The translated strings on the file should follow the order by which Google Vision API extracts text and not the order of the various text bubbles.
         
-    - Interactive typeset from file: A combination of Interactive and Typeset from File.
+    - Interactive typeset from file: A combination of "Interactive" and "Typeset from file".
 
 # Usage
 
@@ -112,7 +112,7 @@ First off, place the script on the same folder as the manga or webtoon JPG image
 The order the arguments should follow is:
 
 ```
-./basic_scanlator.sh [Source Language] [Target Language] [Translation Engine] (Mode)
+./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -r transfile )
 ```
 
 ## Examples 
@@ -120,7 +120,7 @@ The order the arguments should follow is:
 If you wish to translate a Japanese manga to English interactively, run:
 
 ```
-./basic_scanlator.sh jp en deepl
+./basic_scanlator.sh -s jp -t en -e deepl
 ```
 
 
@@ -130,7 +130,7 @@ https://user-images.githubusercontent.com/110120271/181649471-15220046-9bfa-4c02
 If you wish to translate a Korean webtoon to English with your own translation, create a file named transtext.txt, place it on the same folder as the script and the JPG images you wish to process and add in your translated text. This file cannot contain any carriage return characters. You can use Notepad++ to convert the end of lines to Unix format if needed (Edit -> EOL Converversion -> Unix). If you type the word "ignore" on the transtext.txt file, the text block the script is currently on will be skipped; this is useful to avoid SFX.
 
 ```
-./basic_scanlator.sh ko en google typeset-from-file
+./basic_scanlator.sh -s ko -t en -e google -m typeset-from-file
 ```
 
 
