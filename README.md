@@ -37,14 +37,6 @@ Also, make sure you have bash v4+ installed.
 bash -version
 ```
 
-## Script
-
-Add your google and your deepl api keys to the gc_api_key and deepl_api_key variables at top of the script. 
-
->gc_api_key="your-google-api-key" --> gc_api_key="a4db08b7-5729-4ba9-8c08-f2df493465a1"
->
->deepl_api_key="your-deepl-api-key" --> deepl_api_key="279a2e9d-83b3-c416-7e2d-f721593e42a0:fx"
-
 ## API
 
 Google Cloud: https://console.cloud.google.com/freetrial
@@ -73,6 +65,14 @@ Once you have registered:
 
 1. Go to Account -> Account and under Authentication Key for DeepL API, copy & paste your API key to the script.
 
+## Script
+
+Add your google and your deepl api keys to the gc_api_key and deepl_api_key variables at top of the script. 
+
+>gc_api_key="your-google-api-key" --> gc_api_key="a4db08b7-5729-4ba9-8c08-f2df493465a1"
+>
+>deepl_api_key="your-deepl-api-key" --> deepl_api_key="279a2e9d-83b3-c416-7e2d-f721593e42a0:fx"
+
 # Components
 
 >basic_scanlator.sh
@@ -91,17 +91,19 @@ The valid values for each of these are:
     
 3. Translation Engine: google and deepl
     
-4. Mode: interactive (default), automatic, ocr-only, typeset-from-file and interactive-typeset-from-file
+4. Mode: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file and interactive-typeset-from-file
     
     - Interactive: Requests user input for a number of things, namely changing either the extracted raw text or the translated text before typesetting, setting new offset values for text boxes and font sizes. 
         
     - Automatic: Runs without any user input. Extracts raw text, translates and typeset results.
         
-    - OCR Only: Only extracts raw text to a file named rawtext.txt.
+    - OCR only: Only extracts raw text to a file named rawtext.txt.
+    
+    - No typeset: Extracts raw text to a file named rawtext.txt and translation to a file named autotranstext.txt
         
-    - Typeset from File: Uses a text file named transtext.txt as the translated text. The translated strings on the file should follow the order by which Google Vision API extracts text and not the order of the various text bubbles.
+    - Typeset from file: Uses a text file named transtext.txt as the translated text. The translated strings on the file should follow the order by which Google Vision API extracts text and not the order of the various text bubbles.
         
-    - Interactive Typeset from File: A combination of Interactive and Typeset from File.
+    - Interactive typeset from file: A combination of Interactive and Typeset from File.
 
 # Usage
 
@@ -126,6 +128,7 @@ https://user-images.githubusercontent.com/110120271/181649471-15220046-9bfa-4c02
 
 
 If you wish to translate a Korean webtoon to English with your own translation, create a file named transtext.txt, place it on the same folder as the script and the JPG images you wish to process and add in your translated text. This file cannot contain any carriage return characters. You can use Notepad++ to convert the end of lines to Unix format if needed (Edit -> EOL Converversion -> Unix). If you type the word "ignore" on the transtext.txt file, the text block the script is currently on will be skipped; this is useful to avoid SFX.
+
 
 ```
 ./basic_scanlator.sh ko en google typeset-from-file
