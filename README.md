@@ -95,7 +95,7 @@ The valid values for each of these are:
     
     - Interactive: Requests user input for a number of things, namely changing either the extracted raw text or the translated text before typesetting, setting new offset values for text boxes and font sizes. 
         
-    - Automatic: Runs without any user input. Extracts raw text, translates and typeset results.
+    - Automatic: Runs without any user input. Extracts raw text, translates and typesets results.
         
     - OCR only: Only extracts raw text to a file named rawtext.txt.
     
