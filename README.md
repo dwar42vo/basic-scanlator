@@ -99,7 +99,7 @@ The valid values for each of these are:
 
 1. Source Language: jp (Japanese), zh (Simplified Chinese) and ko (Korean)
     
-2. Target Language: en (English) and any other language supported by each of the Translation Engines. Read their respective documentations to find out which are currently supported. [Google](https://cloud.google.com/translate/docs/languages) & [Deepl](https://www.deepl.com/docs-api/translating-text/)
+2. Target Language: en (English) and any other language supported by each of the Translation Engines. Read their respective documentations [here](https://cloud.google.com/translate/docs/languages) and [here](https://www.deepl.com/docs-api/translating-text/) to find out which are currently supported. 
     
 3. Translation Engine: google and deepl
     
