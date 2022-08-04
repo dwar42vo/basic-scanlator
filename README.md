@@ -12,13 +12,13 @@ Lastly, this script is very much a WIP. Unintended results are to be expected.
 
 ## Operating System
 
-WSL with Ubuntu 18.04 or 20.04 installed, [Cywin] (https://www.cygwin.com/) [setup-x86_64.exe] or [MobaXterm] (https://mobaxterm.mobatek.net/download-home-edition.html) (MobaXterm_Installer_v22.1.zip)
+WSL with Ubuntu 18.04 or 20.04 installed, [Cywin](https://www.cygwin.com/) [setup-x86_64.exe] or [MobaXterm](https://mobaxterm.mobatek.net/download-home-edition.html) [MobaXterm_Installer_v22.1.zip]
 
-CC Wild Words (https://freefontsfamily.com/cc-wild-words-roman-font-free/) [CC Wild Words Roman.ttf]
+[CC Wild Words](https://freefontsfamily.com/cc-wild-words-roman-font-free/) [CC Wild Words Roman.ttf]
 
-ImageMagick v7+ (https://imagemagick.org/script/download.php) [e.g. ImageMagick-7.1.0-portable-Q16-x64.zip]
+[ImageMagick v7+](https://imagemagick.org/script/download.php) [ImageMagick-7.1.0-portable-Q16-x64.zip]
 
-JPEGView (https://sourceforge.net/projects/jpegview/files/latest/download) [e.g. JPEGView_1.0.37.zip]
+[JPEGView](https://sourceforge.net/projects/jpegview/files/latest/download) [JPEGView_1.0.37.zip]
 
 These last two should be installed on C:\Program Files
 
@@ -41,7 +41,7 @@ bash -version
 
 ### Google Cloud
 
-Register at https://console.cloud.google.com/freetrial
+Register [here](https://console.cloud.google.com/freetrial)
 
 Once you have done so:
 
@@ -62,15 +62,11 @@ Once you have done so:
 
 Pricing:
 
-https://cloud.google.com/vision/pricing
-
-https://cloud.google.com/translate/pricing
-
-According to the documentation, the first 1 000 requests per month to the Google Cloud Vision API, and the first 500 000 characters per month to the Google Cloud Translate API are free.
+According to the documentation, the first 1 000 requests per month to the [Google Cloud Vision API](https://cloud.google.com/vision/pricing), and the first 500 000 characters per month to the [Google Cloud Translate API](https://cloud.google.com/translate/pricing) are free.
 
 ### Deepl 
 
-Register at https://www.deepl.com/pro-checkout/account?productId=1200&yearly=false&trial=false
+Register [here](https://www.deepl.com/pro-checkout/account?productId=1200&yearly=false&trial=false)
 
 Once you have done so:
 
