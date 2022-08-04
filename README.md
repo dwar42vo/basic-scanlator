@@ -12,7 +12,7 @@ Lastly, this script is very much a WIP. Unintended results are to be expected.
 
 ## Operating System
 
-WSL with Ubuntu 18.04 or 20.04 installed, Cywin (https://www.cygwin.com/) [setup-x86_64.exe] or MobaXterm (https://mobaxterm.mobatek.net/download-home-edition.html) [e.g. MobaXterm_Installer_v22.1.zip]
+WSL with Ubuntu 18.04 or 20.04 installed, [Cywin] (https://www.cygwin.com/) [setup-x86_64.exe] or [MobaXterm] (https://mobaxterm.mobatek.net/download-home-edition.html) (MobaXterm_Installer_v22.1.zip)
 
 CC Wild Words (https://freefontsfamily.com/cc-wild-words-roman-font-free/) [CC Wild Words Roman.ttf]
 
