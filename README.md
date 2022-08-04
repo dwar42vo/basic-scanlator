@@ -6,7 +6,7 @@ This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 
 
 This script only supports Japanese, Chinese and Korean as source languages. The font used by this script is CC Wild Words Roman, but you can change it to any font you have installed on your system. 
 
-Lastly, this script is very much a WIP. Unintended results are to be expected.
+Lastly, this script is a WIP. Unintended results are to be expected.
 
 # Prerequisites
 
