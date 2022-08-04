@@ -41,7 +41,7 @@ bash -version
 
 ### Google Cloud
 
-Register [here](https://console.cloud.google.com/freetrial)
+Register [here](https://console.cloud.google.com/freetrial).
 
 Once you have done so:
 
@@ -66,7 +66,7 @@ According to the documentation, the first 1 000 requests per month to the [Googl
 
 ### Deepl 
 
-Register [here](https://www.deepl.com/pro-checkout/account?productId=1200&yearly=false&trial=false)
+Register [here](https://www.deepl.com/pro-checkout/account?productId=1200&yearly=false&trial=false).
 
 Once you have done so:
 
@@ -99,7 +99,7 @@ The valid values for each of these are:
 
 1. Source Language: jp (Japanese), zh (Simplified Chinese) and ko (Korean)
     
-2. Target Language: en (English) and any other language supported by each of the Translation Engines. Read their respective documentations to find out which are currently supported. Google: https://cloud.google.com/translate/docs/languages Deepl: https://www.deepl.com/docs-api/translating-text/
+2. Target Language: en (English) and any other language supported by each of the Translation Engines. Read their respective documentations to find out which are currently supported. [Google](https://cloud.google.com/translate/docs/languages) & [Deepl](https://www.deepl.com/docs-api/translating-text/)
     
 3. Translation Engine: google and deepl
     
@@ -124,7 +124,7 @@ First off, place the script on the same folder as the manga or webtoon JPG image
 The order the arguments should follow is:
 
 ```
-./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -r transfile )
+./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -r transfile ) ( -o type )
 ```
 
 ## Examples 
@@ -139,7 +139,11 @@ If you wish to translate a Japanese manga to English interactively, run:
 https://user-images.githubusercontent.com/110120271/181649471-15220046-9bfa-4c02-aa83-957bfe0fb84c.mp4
 
 
-If you wish to translate a Korean webtoon to English with your own translation, create a file named transtext.txt, place it on the same folder as the script and the JPG images you wish to process and add in your translated text. This file cannot contain any carriage return characters. You can use Notepad++ to convert the end of lines to Unix format if needed (Edit -> EOL Converversion -> Unix). If you type the word "ignore" on the transtext.txt file, the text block the script is currently on will be skipped; this is useful to avoid SFX.
+If you wish to translate a Korean webtoon to English with your own translation, create a file named transtext.txt, place it on the same folder as the script and the JPG images you wish to process and add in your translated text. 
+
+This file cannot contain any carriage return characters. You can use Notepad++ to convert the end of lines to Unix format if needed (Edit -> EOL Converversion -> Unix). 
+
+If you type the word "ignore" on the transtext.txt file, the text block the script is currently on will be skipped; this is useful to avoid SFX.
 
 ```
 ./basic_scanlator.sh -s ko -t en -e google -m typeset-from-file
