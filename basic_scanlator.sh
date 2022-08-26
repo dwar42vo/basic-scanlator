@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# Prerequite packages: apt-get install coreutils grep curl jq
+# Original Author: Dwarvo Lasorsk
+# Current Revision: 20220819 (v0.8)
+
+# Prerequite Packages: apt-get install coreutils grep curl jq
 
 # Directories of Executables Declaration 
 IMAGEMAGICKDIR="/mnt/c/Program Files/ImageMagick"
@@ -10,13 +13,13 @@ FIREFOXDIR="/mnt/c/Program Files (x86)/Mozilla Firefox"
 CHROMEDIR="/mnt/c/Program Files (x86)/Google/Chrome/Application"
 
 # API Keys Declaration
-gc_api_key="..."
-deepl_api_key="..."
+gc_api_key="AIzaSyBz2MTaqMNsNCq3p2u_hQKBCSRS1WTw3Rk"
+deepl_api_key="8645aa38-7357-a856-351c-5ea007d5b27b:fx"
 
 # Argument Parsing
 if [[ $# -eq 0 ]]
 then
-	echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -r transfile ) ( -o type )\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file\n\n\tAvailable Optimizations: webtoon (default), manga\n"
+	echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -o manga|webtoon ) ( -r transfile )\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file\n\n\tAvailable Optimizations: webtoon (default), manga\n"
 	exit 1
 fi
 
@@ -27,7 +30,7 @@ then
 		
 		-h|--help)
 			
-			echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -r transfile ) ( -o type )\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file\n\n\tAvailable Optimizations: webtoon (default), manga\n"
+			echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -o manga|webtoon ) ( -r transfile )\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file\n\n\tAvailable Optimizations: webtoon (default), manga\n"
 			exit 1
 			;;
 		
@@ -58,7 +61,7 @@ then
 	esac
 fi
 
-if [[ $# -gt 10 ]]
+if [[ $# -gt 16 ]]
 then
 
 	echo "Too many arguments supplied."
@@ -110,10 +113,36 @@ then
 				transfile=${1}
 				;;
 				
-			-o|--optimize-typeset-area)
+			-o|--optimize)
 			
 				shift
 				optimize=${1}
+				;;
+				
+			-i|--input-image-format)
+			
+				shift
+				input_image_format=${1}
+				;;
+			
+			-a|--advanced-typeset-box)
+			
+				advanced_typeset_box_calc=1
+				;;
+			
+			-q)
+			
+				quietness=1
+				;;
+			
+			-qq)
+			
+				quietness=2
+				;;
+				
+			-qqq)
+			
+				quietness=3
 				;;
 			
 			-)
@@ -133,7 +162,7 @@ then
 				break
 				;;
 				
-			esac
+		esac
 			
 		shift 
 		
@@ -163,21 +192,55 @@ then
 	font="CC-Wild-Words-Roman"
 fi
 
-if [[ $optimize == "" ]]
+"$IMAGEMAGICKDIR"/convert.exe -list font | grep "Font:" | cut -d " " -f4 | grep -w "$font" &>> /dev/null
+if [[ $? != 0 ]]
 then
-	optimize="webtoon"
+	echo -e "Font $font is not installed on your system.\nType \"${0} -l\" to see the full list of available fonts."
+	exit 2
 fi
 
-if [[ $optimize != "manga" ]] && [[ $optimize != "webtoon" ]]
+if [[ $optimize == "" ]]
+then
+	optimize="none"
+fi
+
+if [[ $optimize != "manga" ]] && [[ $optimize != "webtoon" ]] && [[ $optimize != "none" ]]
 then
 	echo "Invalid optimization."
 	exit 2
 fi
 
-"$IMAGEMAGICKDIR"/convert.exe -list font | grep "Font:" | cut -d " " -f4 | grep -w "$font" &>> /dev/null
-if [[ $? != 0 ]]
+if [[ $input_image_format == "" ]]
 then
-	echo -e "Font $font is not installed on your system.\nType \"${0} -l\" to see the full list of available fonts."
+	input_image_format="jpg"
+fi
+
+input_image_format=$( echo "$input_image_format" | tr '[:upper:]' '[:lower:]' )
+if [[ $input_image_format != "jpg" ]] && [[ $input_image_format != "png" ]] && [[ $input_image_format != "webp" ]]
+then
+	echo "Unsupported or invalid input image format."
+	exit 2
+fi
+
+if [[ $advanced_typeset_box_calc == "" ]]
+then
+	advanced_typeset_box_calc=0
+fi
+
+if [[ $advanced_typeset_box_calc == 1 ]] && ( [[ $mode == "ocr-only" ]] || [[ $mode == "no-typeset" ]] )
+then
+	echo "Advanced typeset box calculator cannot be used with modes ocr-only and no-typeset."
+	exit 2
+fi
+
+if [[ $quietness == "" ]]
+then
+	quietness=0
+fi
+
+if [[ $quietness -gt 0 ]] && [[ $mode != "automatic" ]] && [[ $mode != "ocr-only" ]] && [[ $mode != "no-typeset" ]] && [[ $mode != "typeset-from-file" ]]
+then
+	echo "Quietness can only be used with modes automatic, ocr-only, no-typeset and typeset-from-file."
 	exit 2
 fi
 
@@ -257,70 +320,230 @@ fi
 [[ -f autotranstext.txt ]] && rm autotranstext.txt
 [[ -f read.html ]] && rm read.html
 
-for img in $(ls -v *.jpg)
+# Functions
+fetch_coordinates () {
+
+	if [[ $2 == 0 ]]
+	then
+		x1b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[0].x' ocrresponse.json)	
+		x2b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[1].x' ocrresponse.json)
+		x3b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[2].x' ocrresponse.json)
+		x4b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[3].x' ocrresponse.json)
+		
+		y1b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[0].y' ocrresponse.json)
+		y2b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[1].y' ocrresponse.json)
+		y3b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[2].y' ocrresponse.json)
+		y4b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[3].y' ocrresponse.json)
+	fi
+	
+	if [[ $2 == 1 ]]
+	then
+		x1bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[0].x' ocrresponse.json)
+		x2bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[1].x' ocrresponse.json)
+		x3bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[2].x' ocrresponse.json)
+		x4bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[3].x' ocrresponse.json)
+	
+		y1bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[0].y' ocrresponse.json)
+		y2bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[1].y' ocrresponse.json)
+		y3bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[2].y' ocrresponse.json)
+		y4bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$1"'].boundingBox.vertices[3].y' ocrresponse.json)
+	fi
+
+}
+
+find_box_border_coordinates () {
+
+	if [[ $9 == 0 ]] && [[ $8 == x ]]; then xcrop="200"; ycrop="1"; mirror="-flop"; offoper="-"; fi
+	if [[ $9 == 0 ]] && [[ $8 == y ]]; then xcrop="1"; ycrop="200"; mirror="-flip"; offoper="-"; fi
+	if [[ $9 == 1 ]] && [[ $8 == x ]]; then xcrop="200"; ycrop="1"; mirror=""; offoper="+"; fi 
+	if [[ $9 == 1 ]] && [[ $8 == y ]]; then xcrop="1"; ycrop="200"; mirror=""; offoper="+"; fi
+	
+	for line in $( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -alpha off -gravity northwest -crop $xcrop\x$ycrop+$1+$2 $mirror txt:- | awk -F " " '{print $1$2}' | tail -n +2 ) 
+	do
+	
+#		echo "Debug: $line"
+		color=$( echo $line | cut -d ":" -f2 | tr -d "(" | tr -d ")" ) 
+		if [[ $color -le 128 ]] 
+		then 
+			
+			if [[ $8 == x ]]
+			then
+				offset=$(( $(echo "$line" | cut -d ":" -f1 | cut -d "," -f1 ) - $3 ))
+				[[ $quietness -lt 1 ]] && "$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $(( $4 $offoper $offset )),$5 $(( $6 $offoper $offset )),$7" $imgconv
+			fi
+			
+			if [[ $8 == y ]] 
+			then
+				offset=$(( $(echo "$line" | cut -d ":" -f1 | cut -d "," -f2 ) - $3 ))
+				[[ $quietness -lt 1 ]] && "$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $4,$(( $5 $offoper $offset )) $6,$(( $7 $offoper $offset ))" $imgconv
+			fi
+				
+			break
+		
+		fi
+	
+	done
+	
+	echo $offset
+
+}
+
+box_border_coordinates_pick_min () {
+
+	if [[ $1 != "" ]]
+	then
+		if [[ $2 != "" ]]
+		then
+			if [[ $1 -ge 0 ]] && [[ $2 -ge 0 ]]
+			then
+				[[ $2 -gt $1 ]] && offset="$1" || offset="$2"
+			fi
+		else
+			if [[ $1 -ge 0 ]]
+			then
+				offset="$1"
+			fi
+		fi
+	fi
+	
+	echo $offset
+
+}
+
+font_size_optimizer () {
+
+	[[ $optimize == "manga" ]] && ifs=("0" "6" "8" "14" "18" "22" "26" "32" "38");
+	[[ $optimize == "webtoon" ]] && ifs=("0" "12" "16" "22" "26" "30" "34" "40" "46");
+
+	if [[ $fontsize -lt ${ifs[1]} ]]
+	then
+					
+		while [[ $fontsize -lt ${ifs[2]} ]]
+		do
+			x1boffset=$(( $x1boffset + 5 ))
+			x3boffset=$(( $x3boffset + 5 ))
+			fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font $font -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
+		done
+					
+		[[ $quietness -lt 2 ]] && echo "Font size too small. Automatically reajusted x1 (left) and x3 (right) to $x1boffset and $x3boffset."
+		[[ $quietness -lt 2 ]] && echo "Font size automatically reajusted to $fontsize."
+					
+	fi
+	
+	if [[ $fontsize -gt ${ifs[3]} ]] && [[ $fontsize -le ${ifs[5]} ]]
+	then
+		fontsize=${ifs[3]}
+		[[ $quietness -lt 2 ]] && echo "Font size too large. Resizing to $fontsize."
+	fi
+	
+	if [[ $fontsize -gt ${ifs[5]} ]] && [[ $fontsize -le ${ifs[7]} ]]
+	then
+		fontsize=${ifs[4]}
+		[[ $quietness -lt 2 ]] && echo "Font size too large. Resizing to $fontsize."
+	fi
+	
+	if [[ $fontsize -gt ${ifs[7]} ]] && [[ $fontsize -le ${ifs[8]} ]]
+	then
+		fontsize=${ifs[5]}
+		[[ $quietness -lt 2 ]] && echo "Font size too large. Resizing to $fontsize."
+	fi
+	
+	if [[ $fontsize -gt ${ifs[8]} ]]
+	then
+		fontsize=${ifs[6]}
+		[[ $quietness -lt 2 ]] && echo "Font size too large. Resizing to $fontsize."
+	fi
+
+}
+
+# Image Cycle
+for img in $(ls -v *.$input_image_format)
 do
 
 # Image to PNG Conversion
-imgconv=$(echo $img | tr "jpg" "png")
+if [[ "$input_image_format" != "png" ]]
+then
 
-"$IMAGEMAGICKDIR"/convert.exe $img $imgconv
+	imgconv=$( echo $img | tr ".$input_image_format" ".png" )
+	"$IMAGEMAGICKDIR"/convert.exe $img $imgconv
+	
+else
 
-echo "Selected image: $imgconv"
+	[[ $img == "ruler.png" ]] && continue
+	imgconv=$( echo $img | sed 's/.png/mod.png/' )
+	cp $img $imgconv
+	
+fi
+
+[[ $quietness -lt 3 ]] && echo "Selected image: $imgconv"
 
 # Opening of Image with JPEGView
-"$IMAGEVIEWERDIR"/JPEGView.exe "$imgconv" &
+[[ $quietness -lt 1 ]] && "$IMAGEVIEWERDIR"/JPEGView.exe "$imgconv" &
 
-# Watermark Removal
-#imgwidth=$("$IMAGEMAGICKDIR"/identify.exe -ping -format '%h' $imgconv)
-#imgheight=$("$IMAGEMAGICKDIR"/identify.exe -ping -format '%h' $imgconv)
+imgwidth=$("$IMAGEMAGICKDIR"/identify.exe -ping -format '%w' $imgconv)
+imgheight=$("$IMAGEMAGICKDIR"/identify.exe -ping -format '%h' $imgconv)
 
-#"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill white -draw "rectangle 15,8 180,24" watercls_$imgconv
-#"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill white -draw "rectangle 1320,$(( $imgheight - 88 )) 1584,$(( $imgheight - 16 ))" watercls_$imgconv
+# Watermark Removal (Optional)
+"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill white -draw "rectangle 15,8 180,24" watercls_$imgconv
+#"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill white -draw "rectangle $(( $imgwidth - 150 )),$(( $imgheight - 32 )) $imgwidth,$imgheight" watercls_$imgconv
 
 # OCR Request
-#base64 watercls_$imgconv > $imgconv.txt
-base64 $imgconv > $imgconv.txt
+base64 watercls_$imgconv > $imgconv.txt
+#base64 $imgconv > $imgconv.txt
 
 echo -e "{\"requests\": [{\"image\": {\"content\": \"$(cat $imgconv.txt)\"},\"features\": [{\"type\": \"TEXT_DETECTION\"}]}]}" > ocrresquest.json
 
-echo "OCRing image... "
+[[ $quietness -lt 3 ]] && echo "OCRing image... "
 
 curl -s -X POST -H "X-Goog-Api-Key: $gc_api_key" -H "Content-Type: application/json; charset=utf-8" -d @ocrresquest.json "https://vision.googleapis.com/v1/images:annotate" > ocrresponse.json
 
-#rm watercls_$imgconv
-rm $imgconv.txt
+[[ -f watercls_$imgconv ]] && rm watercls_$imgconv
+[[ -f $imgconv.txt ]] && rm $imgconv.txt
 
-# OCR Response Parsing
 numtb=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks | length' ocrresponse.json)
 
-echo "Number of text blocks found: $numtb"
+[[ $quietness -lt 2 ]] && echo "Number of text blocks found: $numtb"
 
+# Bounding Box Cycle
 i=0
 while [[ $i != $numtb ]]
 do
 
-	echo "Fetching bounding box coordinates... "
+	[[ $quietness -lt 2 ]] && echo "Fetching bounding box coordinates... "
 	
 	if [[ $i == 0 ]]
 	then
 	
-		x1b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$i"'].boundingBox.vertices[0].x' ocrresponse.json)	
-		x2b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$i"'].boundingBox.vertices[1].x' ocrresponse.json)
-		x3b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$i"'].boundingBox.vertices[2].x' ocrresponse.json)
-		x4b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$i"'].boundingBox.vertices[3].x' ocrresponse.json)
+		fetch_coordinates $i 0
 		
-		y1b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$i"'].boundingBox.vertices[0].y' ocrresponse.json)
-		y2b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$i"'].boundingBox.vertices[1].y' ocrresponse.json)
-		y3b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$i"'].boundingBox.vertices[2].y' ocrresponse.json)
-		y4b=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$i"'].boundingBox.vertices[3].y' ocrresponse.json)
-		
-		diffy2by1b=$(( $y2b - $y1b ))
-
-		if [[ ${diffy2by1b/#-/} -gt 5 ]]
+		# Fix rotated coordinates
+		if [[ $y1b -gt $y3b ]] && [[ $x1b -lt $x3b ]]
 		then
+			ytmp=$y1b
+			y1b=$y3b
+			y3b=$ytmp
+		fi
+		
+		if [[ $y2b -lt $y4b ]] && [[ $x2b -lt $x4b ]]
+		then
+			xtmp=$x2b
+			x2b=$x4b
+			x4b=$xtmp
+		fi
+		
+		# Ignore diagonal bounding box
+		diffy2by1b=$(( $y2b - $y1b ))
+		diffy4by3b=$(( $y4b - $y3b ))
+
+		if [[ ${diffy2by1b/#-/} -gt 5 ]] && [[ ${diffy4by3b/#-/} -gt 5 ]]
+		then
+		
+			fetch_coordinates $(($i+1)) 1
+			
 			i=$(($i+1))
-			echo "Skipping diagonal bounding box."
+			[[ $quietness -lt 2 ]] && echo "Skipping diagonal bounding box."
 			continue
+			
 		fi
 		
 	else
@@ -343,25 +566,63 @@ do
 		else
 		
 			x1b="$x1bn"
+			x2b="$x2bn"
 			x3b="$x3bn"
+			x4b="$x4bn"
+			
 			y1b="$y1bn"
+			y2b="$y2bn"
 			y3b="$y3bn"
+			y4b="$y4bn"
+			
+			# Fix rotated coordinates
+			if [[ $y1b -gt $y3b ]] && [[ $x1b -lt $x3b ]]
+			then
+				ytmp=$y1b
+				y1b=$y3b
+				y3b=$ytmp
+			fi
+		
+			if [[ $y2b -lt $y4b ]] && [[ $x2b -lt $x4b ]]
+			then
+				xtmp=$x2b
+				x2b=$x4b
+				x4b=$xtmp
+			fi
+		
+			# Ignore diagonal bounding box
+			diffy2by1b=$(( $y2b - $y1b ))
+			diffy4by3b=$(( $y4b - $y3b ))
+
+			if [[ ${diffy2by1b/#-/} -gt 5 ]] && [[ ${diffy4by3b/#-/} -gt 5 ]]
+			then
+			
+				fetch_coordinates $(($i+1)) 1
+			
+				i=$(($i+1))
+				[[ $quietness -lt 2 ]] && echo "Skipping diagonal bounding box."
+				continue
+			
+			fi
 			
 		fi
 		
 	fi
+	
+	echo "Debug: X: $x1b $x2b $x3b $x4b || Y: $y1b $y2b $y3b $y4b"
 
 	imgconvtmpname=$( echo $imgconv | cut -d "." -f1 )
 	imgconvtmp=$( echo $imgconvtmpname\_tmp.png )
 	imgconvtmp2=$( echo $imgconvtmpname\_tmp2.png )
+	imgconvtmp3=$( echo $imgconvtmpname\_tmp3.png )
 	
-	cp $imgconv $imgconvtmp
+	[[ $quietness -lt 1 ]] && cp $imgconv $imgconvtmp
 
 	sleep 1
-	"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill "rgba(228,237,47,0.5)" -stroke black -draw "rectangle $x1b,$y1b $x3b,$y3b" $imgconv
+	[[ $quietness -lt 1 ]] && "$IMAGEMAGICKDIR"/convert.exe $imgconv -fill "rgba(228,237,47,0.5)" -stroke black -draw "rectangle $x1b,$y1b $x3b,$y3b" $imgconv
 	
 	# Raw String Extraction Phase
-	echo "Extracting raw string... "
+	[[ $quietness -lt 3 ]] && echo "Extracting raw string... "
 	
 	breaks=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$i"'].paragraphs[].words[].symbols[].property.detectedBreak.type' ocrresponse.json | cut -d "\"" -f2)
 	
@@ -406,67 +667,66 @@ do
 
 	[[ $sourcelang == "ko" ]] && rawstring=$(echo ${rawstring::${#rawstring}-1})
 	
+	fetch_coordinates $(($i+1)) 1
+	
 	if [[ $(echo $rawstring | grep -o -P '[\p{Hangul}]') == "" ]] && [[ $sourcelang == "ko" ]]
 	then
 		sleep 1
-		mv $imgconvtmp $imgconv
+		[[ $quietness -lt 1 ]] && mv $imgconvtmp $imgconv
 		i=$(($i+1))
-		echo "Selected raw string: $rawstring"
-		echo "Skipping raw string."
+		[[ $quietness -lt 2 ]] && echo "Selected raw string: $rawstring"
+		[[ $quietness -lt 2 ]] && echo "Skipping raw string."
 		continue
 	fi 
 	
 	if [[ $(echo $rawstring | grep -o -P '[\p{Han}]') == "" ]] && [[ $sourcelang == "zh" ]]
 	then
 		sleep 1
-		mv $imgconvtmp $imgconv
+		[[ $quietness -lt 1 ]] && mv $imgconvtmp $imgconv
 		i=$(($i+1))
-		echo "Selected raw string: $rawstring"
-		echo "Skipping raw string."
+		[[ $quietness -lt 2 ]] && echo "Selected raw string: $rawstring"
+		[[ $quietness -lt 2 ]] && echo "Skipping raw string."
 		continue
 	fi
 	
 	if ( [[ $(echo $rawstring | grep -o -P '[\p{Han}]') == "" ]] && [[ $(echo $rawstring | grep -o -P '[\p{Hiragana}]') == "" ]] && [[ $(echo $rawstring | grep -o -P '[\p{Katakana}]') == "" ]] ) && [[ $sourcelang == "ja" ]]
 	then
 		sleep 1
-		mv $imgconvtmp $imgconv
+		[[ $quietness -lt 1 ]] && mv $imgconvtmp $imgconv
 		i=$(($i+1))
-		echo "Selected raw string: $rawstring"
-		echo "Skipping raw string."
+		[[ $quietness -lt 2 ]] && echo "Selected raw string: $rawstring"
+		[[ $quietness -lt 2 ]] && echo "Skipping raw string."
 		continue
 	fi
 	
-	if [[ $nextblockjoin == 1 ]]
+	if [[ $nextblockjoin == 1 ]] && [[ $sourcelang == "ko" ]]
 	then
 		rawstring="$prevrawstring $rawstring"
 		nextblockjoin=0
 	fi
 	
-	x1bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$(($i+1))"'].boundingBox.vertices[0].x' ocrresponse.json)
-	x2bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$(($i+1))"'].boundingBox.vertices[1].x' ocrresponse.json)
-	x3bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$(($i+1))"'].boundingBox.vertices[2].x' ocrresponse.json)
-	x4bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$(($i+1))"'].boundingBox.vertices[3].x' ocrresponse.json)
-	
-	y1bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$(($i+1))"'].boundingBox.vertices[0].y' ocrresponse.json)
-	y2bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$(($i+1))"'].boundingBox.vertices[1].y' ocrresponse.json)
-	y3bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$(($i+1))"'].boundingBox.vertices[2].y' ocrresponse.json)
-	y4bn=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$(($i+1))"'].boundingBox.vertices[3].y' ocrresponse.json)
+	if [[ $nextblockjoin == 1 ]] && ( [[ $sourcelang == "jp" ]] || [[ $sourcelang == "zh" ]] )
+	then
+		rawstring="$prevrawstring$rawstring"
+		nextblockjoin=0
+	fi
 
 	diffy2bny1bn=$(( $y2bn - $y1bn ))
+	diffy4bny3bn=$(( $y4bn - $y3bn ))
 
-	if [[ $x1bn != "null" ]] && [[ $y1bn -gt $y3b ]] && [[ $y1bn -lt $(( $y3b + (($y3b - $y1b) / $breakcont) )) ]] && [[ ${diffy2bny1bn/#-/} -lt 5 ]] && [[ $optimize == "webtoon" ]]
+	if [[ $x1bn != "null" ]] && [[ $y1bn -gt $y3b ]] && [[ $y1bn -lt $(( $y3b + (($y3b - $y1b) / $breakcont) )) ]] && [[ ${diffy2bny1bn/#-/} -lt 5 ]] && [[ ${diffy4bny3bn/#-/} -lt 5 ]] && [[ $sourcelang != "ja" ]]
 	then
 		nextblockjoin=1
 		prevrawstring="$rawstring"
 		sleep 1
-		mv $imgconvtmp $imgconv
+		[[ $quietness -lt 1 ]] && mv $imgconvtmp $imgconv
 		i=$(($i+1))
-		echo "Selected raw string: $rawstring"
-		echo "Next block will be joined."
+		[[ $quietness -lt 2 ]] && echo "Selected raw string: $rawstring"
+		[[ $quietness -lt 2 ]] && echo "Next block will be joined."
 		continue
 	fi
 
-	echo "Selected raw string: $rawstring"
+	[[ $quietness -lt 2 ]] && echo "Selected raw string: $rawstring"
 	
 	echo "$rawstring" >> rawtext.txt
 	
@@ -494,7 +754,7 @@ do
 	if [[ $mode == "ocr-only" ]]
 	then
 		sleep 1
-		mv $imgconvtmp $imgconv
+		[[ $quietness -lt 1 ]] && mv $imgconvtmp $imgconv
 		i=$(($i+1))
 		continue
 	fi
@@ -506,23 +766,23 @@ do
 		if [[ $mode == "typeset-from-file" ]] || [[ $mode == "interactive-typeset-from-file" ]]
 		then
 		
-			echo "Using user provided translated string."
+			[[ $quietness -lt 3 ]] && echo "Using user provided translated string."
 			transstringcount=$(( $transstringcount + 1 ))
 			transstring=$(cat $transfile | tail -n +$transstringcount | head -n +1)
 			
 			if [[ $transstring == "Ignore" ]] || [[ $transstring == "ignore" ]]
 			then
 				sleep 1
-				mv $imgconvtmp $imgconv
+				[[ $quietness -lt 1 ]] && mv $imgconvtmp $imgconv
 				i=$(($i+1))
-				echo "Ignoring as per user input."
+				[[ $quietness -lt 2 ]] && echo "Ignoring as per user input."
 				continue
 			fi
 			
 		else
 		
 			echo -e "{\n \"q\": \"$rawstring\",\n \"source\": \"$sourcelang\",\n \"target\": \"$targetlang\",\n \"format\": \"text\"\n}" > transresquest.json
-			echo "Translating raw string... "
+			[[ $quietness -lt 3 ]] && echo "Translating raw string... "
 			transstring=$(curl -s -X POST -H "X-Goog-Api-Key: $gc_api_key" -H "Content-Type: application/json; charset=utf-8" -d @transresquest.json "https://translation.googleapis.com/language/translate/v2" | jq '.data.translations[].translatedText' | sed 's/\"//g' | sed 's/\\//g')
 			echo "$transstring" >> autotranstext.txt
 			
@@ -534,32 +794,34 @@ do
 		if [[ $mode == "typeset-from-file" ]] || [[ $mode == "interactive-typeset-from-file" ]]
 		then
 		
-			echo "Using user provided translated string."
+			[[ $quietness -lt 3 ]] && echo "Using user provided translated string."
 			transstringcount=$(( $transstringcount + 1 ))
 			transstring=$(cat $transfile | tail -n +$transstringcount | head -n +1)
 			
 			if [[ $transstring == "Ignore" ]] || [[ $transstring == "ignore" ]]
 			then
 				sleep 1
-				mv $imgconvtmp $imgconv
+				[[ $quietness -lt 1 ]] && mv $imgconvtmp $imgconv
 				i=$(($i+1))
-				echo "Ignoring as per user input."
+				[[ $quietness -lt 2 ]] && echo "Ignoring as per user input."
 				continue
 			fi
 			
 		else
 		
-			echo "Translating raw string... "
+			[[ $quietness -lt 3 ]] && echo "Translating raw string... "
 			transstring=$(curl -s "https://api-free.deepl.com/v2/translate" -d "auth_key=$deepl_api_key" -d "text=$rawstring" -d "source_lang=$sourcelang" -d "target_lang=$targetlang" | jq '.translations[].text' | sed 's/\"//g' | sed 's/\\//g')
 			echo "$transstring" >> autotranstext.txt
 			
 		fi
 	fi
 	
+	[[ $quietness -lt 2 ]] && echo "Translated string: $transstring"
+	
 	if [[ $mode == "no-typeset" ]]
 	then
 		sleep 1
-		mv $imgconvtmp $imgconv
+		[[ $quietness -lt 1 ]] && mv $imgconvtmp $imgconv
 		i=$(($i+1))
 		continue
 	fi
@@ -570,7 +832,7 @@ do
 	y1boffset=0
 	y3boffset=5
 	
-	if [[ $optimize == "manga" ]]
+	if [[ $advanced_typeset_box_calc == 1 ]]
 	then
 		
 		x1boffset1="" 
@@ -583,236 +845,56 @@ do
 		y3boffset1=""
 		y3boffset3=""
 		
-		echo "Calculating optimal offset values..."
+		[[ $quietness -lt 3 ]] && echo "Calculating optimal offset values..."
 		
-		for line in $( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -gravity northwest -crop 200x1+$(($x1b - 200))+$y1b txt:- | awk -F " " '{print $1$2}' | tail -n +2 | tac ) 
-		do
-			num=$( echo $line | cut -d ":" -f2 | tr -d "(" | tr -d ")" ) 
-			if [[ $num -le 128 ]] 
-			then 
-				x1boffset1=$(( $( "$IMAGEMAGICKDIR"/convert.exe $img -gravity northwest -crop 200x1+$(($x1b - 200))+$y1b txt:- | awk -F " " '{print $1$2}' | tail -n +2 | tac | wc -l ) - $(echo "$line" | cut -d ":" -f1 | cut -d "," -f1 ) - 10 ))
-				"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $(( $x1b - $x1boffset1 - 10 )),$y1b $(( $x1b - $x1boffset1 - 10 )),$(( $y1b + 2 ))" $imgconv
-				break
-			fi
-		done
+		x1boffset1=$( find_box_border_coordinates $(( $x1b - 200 )) $y1b 10 $(( $x1b - 10 )) $y1b $(( $x1b - 10 )) $(( $y1b + 2 )) x 0 )
+		x3boffset1=$( find_box_border_coordinates $(( $x3b + 5 )) $y1b 5 $(( $x3b + 10 )) $y1b $(( $x3b + 10 )) $(( $y1b + 2 )) x 1 )
+		y1boffset1=$( find_box_border_coordinates $x1b $(( $y1b - 200 )) 20 $x1b $(( $y1b - 20 )) $(( $x1b + 2 )) $(( $y1b - 20 )) y 0 )
+		y3boffset1=$( find_box_border_coordinates $x1b $(( $y3b + 5 )) 15 $x1b $(( $y3b + 20 )) $(( $x1b + 2 )) $(( $y3b + 20 )) y 1 )
 		
-		for line in $( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -gravity northwest -crop 200x1+$(( $x3b + 5 ))+$y1b txt:- | awk -F " " '{print $1$2}' | tail -n +2 ) 
-		do
-			num=$( echo $line | cut -d ":" -f2 | tr -d "(" | tr -d ")" ) 
-			if [[ $num -le 128 ]] 
-			then 
-				x3boffset1=$(( $(echo "$line" | cut -d ":" -f1 | cut -d "," -f1 ) - 5 ))
-				"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $(( $x3b + $x3boffset1 + 10 )),$y1b $(( $x3b + $x3boffset1 + 10 )),$(( $y1b + 2 ))" $imgconv
-				break
-			fi
-		done
+		x1boffset3=$( find_box_border_coordinates $(( $x1b - 200 )) $y3b 10 $(( $x1b - 10 )) $y3b $(( $x1b - 10 )) $(( $y3b + 2 )) x 0 )
+		x3boffset3=$( find_box_border_coordinates $(( $x3b + 5 )) $y3b 5 $(( $x3b + 10 )) $y3b $(( $x3b + 10 )) $(( $y3b + 2 )) x 1 )
+		y1boffset3=$( find_box_border_coordinates $x3b $(( $y1b - 200 )) 20 $x3b $(( $y1b - 20 )) $(( $x3b + 2 )) $(( $y1b - 20 )) y 0 )
+		y3boffset3=$( find_box_border_coordinates $x3b $(( $y3b + 5 )) 15 $x3b $(( $y3b + 20 )) $(( $x3b + 2 )) $(( $y3b + 20 )) y 1 )
 		
-		for line in $( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -gravity northwest -crop 1x200+$x1b+$(($y1b - 200)) txt:- | awk -F " " '{print $1$2}' | tail -n +2 | tac ) 
-		do
-			num=$( echo $line | cut -d ":" -f2 | tr -d "(" | tr -d ")" ) 
-			if [[ $num -le 128 ]] 
-			then 
-				y1boffset1=$(( $( "$IMAGEMAGICKDIR"/convert.exe $img -gravity northwest -crop 1x200+$x1b+$(($y1b - 200)) txt:- | awk -F " " '{print $1$2}' | tail -n +2 | tac | wc -l ) - $(echo "$line" | cut -d ":" -f1 | cut -d "," -f2 ) - 20 ))
-				"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $x1b,$(($y1b - $y1boffset1 - 20)) $(( $x1b + 2 )),$(($y1b - $y1boffset1 - 20))" $imgconv
-				break
-			fi
-		done
+		echo "Debug: $x1boffset1 $x1boffset3 | $x3boffset1 $x3boffset3 | $y1boffset1 $y1boffset3 | $y3boffset1 $y3boffset3"
 		
-		for line in $( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -gravity northwest -crop 1x200+$x1b+$(( $y3b + 5 )) txt:- | awk -F " " '{print $1$2}' | tail -n +2 ) 
-		do
-			num=$( echo $line | cut -d ":" -f2 | tr -d "(" | tr -d ")" ) 
-			if [[ $num -le 128 ]] 
-			then 
-				y3boffset1=$(( $(echo "$line" | cut -d ":" -f1 | cut -d "," -f2 ) - 15 ))
-				"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $x1b,$(($y3b + $y3boffset1 + 20)) $(( $x1b + 2 )),$(($y3b + $y3boffset1 + 20))" $imgconv
-				break
-			fi
-		done
+		x1boffsettmp=$( box_border_coordinates_pick_min $x1boffset1 $x1boffset3 )
+		[[ $x1boffsettmp != "" ]] && x1boffset=$x1boffsettmp
+		x1boffsettmp=$( box_border_coordinates_pick_min $x1boffset3 $x1boffset1 )
+		[[ $x1boffsettmp != "" ]] && x1boffset=$x1boffsettmp
+		x3boffsettmp=$( box_border_coordinates_pick_min $x3boffset1 $x3boffset3 )
+		[[ $x3boffsettmp != "" ]] && x3boffset=$x3boffsettmp
+		x3boffsettmp=$( box_border_coordinates_pick_min $x3boffset3 $x3boffset1 )
+		[[ $x3boffsettmp != "" ]] && x3boffset=$x3boffsettmp
 		
-		for line in $( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -gravity northwest -crop 200x1+$(($x1b - 200))+$y3b txt:- | awk -F " " '{print $1$2}' | tail -n +2 | tac ) 
-		do
-			num=$( echo $line | cut -d ":" -f2 | tr -d "(" | tr -d ")" ) 
-			if [[ $num -le 128 ]] 
-			then 
-				x1boffset3=$(( $( "$IMAGEMAGICKDIR"/convert.exe $img -gravity northwest -crop 200x1+$(($x1b - 200))+$y3b txt:- | awk -F " " '{print $1$2}' | tail -n +2 | tac | wc -l ) - $(echo "$line" | cut -d ":" -f1 | cut -d "," -f1 ) - 10 ))
-				"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $(( $x1b - $x1boffset3 - 10 )),$y3b $(( $x1b - $x1boffset3 - 10 )),$(( $y3b + 2 ))" $imgconv
-				break
-			fi
-		done
+		y1boffsettmp=$( box_border_coordinates_pick_min $y1boffset1 $y1boffset3 )
+		[[ $y1boffsettmp != "" ]] && y1boffset=$y1boffsettmp
+		y1boffsettmp=$( box_border_coordinates_pick_min $y1boffset3 $y1boffset1 )
+		[[ $y1boffsettmp != "" ]] && y1boffset=$y1boffsettmp
+		y3boffsettmp=$( box_border_coordinates_pick_min $y3boffset1 $y3boffset3 )
+		[[ $y3boffsettmp != "" ]] && y3boffset=$y3boffsettmp
+		y3boffsettmp=$( box_border_coordinates_pick_min $y3boffset3 $y3boffset1 )
+		[[ $y3boffsettmp != "" ]] && y3boffset=$y3boffsettmp
 		
-		for line in $( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -gravity northwest -crop 200x1+$(( $x3b + 5 ))+$y3b txt:- | awk -F " " '{print $1$2}' | tail -n +2 ) 
-		do
-			num=$( echo $line | cut -d ":" -f2 | tr -d "(" | tr -d ")" ) 
-			if [[ $num -le 128 ]] 
-			then 
-				x3boffset3=$(( $(echo "$line" | cut -d ":" -f1 | cut -d "," -f1 ) - 5 ))
-				"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $(( $x3b + $x3boffset3 + 10 )),$y3b $(( $x3b + $x3boffset3 + 10 )),$(( $y3b + 2 ))" $imgconv
-				break
-			fi
-		done
+		echo "Debug2: $x1boffset1 $x1boffset3 | $x3boffset1 $x3boffset3 | $y1boffset1 $y1boffset3 | $y3boffset1 $y3boffset3"
 		
-		for line in $( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -gravity northwest -crop 1x200+$x3b+$(($y1b - 200)) txt:- | awk -F " " '{print $1$2}' | tail -n +2 | tac ) 
-		do 
-			num=$( echo $line | cut -d ":" -f2 | tr -d "(" | tr -d ")" ) 
-			if [[ $num -le 128 ]] 
-			then 
-				y1boffset3=$(( $( "$IMAGEMAGICKDIR"/convert.exe $img -gravity northwest -crop 1x200+$x3b+$(($y1b - 200)) txt:- | awk -F " " '{print $1$2}' | tail -n +2 | tac | wc -l ) - $(echo "$line" | cut -d ":" -f1 | cut -d "," -f2 ) - 20 ))
-				"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $x3b,$(($y1b - $y1boffset3 - 20)) $(( $x3b + 2 )),$(($y1b - $y1boffset3 - 20))" $imgconv
-				break
-			fi
-		done
+		[[ $quietness -lt 2 ]] && echo "Offset x1 (left) with value $x1boffset automatically acquired."
+		[[ $quietness -lt 2 ]] && echo "Offset x3 (right) with value $x3boffset automatically acquired."
 		
-		for line in $( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -gravity northwest -crop 1x200+$x3b+$(( $y3b + 5 )) txt:- | awk -F " " '{print $1$2}' | tail -n +2 ) 
-		do 
-			num=$( echo $line | cut -d ":" -f2 | tr -d "(" | tr -d ")" ) 
-			if [[ $num -le 128 ]] 
-			then 
-				y3boffset3=$(( $(echo "$line" | cut -d ":" -f1 | cut -d "," -f2 ) - 15 ))
-				"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $x3b,$(($y3b + $y3boffset3 + 20)) $(( $x3b + 2 )),$(($y3b + $y3boffset3 + 20))" $imgconv
-				break
-			fi
-		done
+		[[ $quietness -lt 2 ]] && echo "Offset y1 (up) with value $y1boffset automatically acquired."
+		[[ $quietness -lt 2 ]] && echo "Offset y3 (down) with value $y3boffset automatically acquired."
 		
-		if [[ $x1boffset1 != "" ]]
+		if [[ $x1boffset -lt 10 ]] && [[ $x3boffset -lt 10 ]] && [[ $y3boffset -lt 10 ]] && [[ $y1boffset -gt 20 ]]
 		then
-			if [[ $x1boffset3 != "" ]]
-			then
-				if [[ $x1boffset1 -ge 0 ]] && [[ $x1boffset3 -ge 0 ]]
-				then
-					[[ $x1boffset3 -gt $x1boffset1 ]] && x1boffset="$x1boffset1" || x1boffset="$x1boffset3"
-				fi
-			else
-				if [[ $x1boffset1 -ge 0 ]]
-				then
-					x1boffset="$x1boffset1"
-				fi
-			fi
+			y1boffset="$y3boffset"
+			[[ $quietness -lt 2 ]] && echo "Offset y1 (up) too large. Setting y1 to y3 value $y1boffset"
 		fi
-		
-		if [[ $x1boffset3 != "" ]]
-		then
-			if [[ $x1boffset1 != "" ]]
-			then
-				if [[ $x1boffset1 -ge 0 ]] && [[ $x1boffset3 -ge 0 ]]
-				then
-					[[ $x1boffset3 -gt $x1boffset1 ]] && x1boffset="$x1boffset1" || x1boffset="$x1boffset3"
-				fi
-			else
-				if [[ $x1boffset3 -ge 0 ]]
-				then
-					x1boffset="$x1boffset3"
-				fi
-			fi
-		fi
-		
-		if [[ $x3boffset1 != "" ]]
-		then
-			if [[ $x3boffset3 != "" ]]
-			then
-				if [[ $x3boffset1 -ge 0 ]] && [[ $x3boffset3 -ge 0 ]]
-				then
-					[[ $x3boffset3 -gt $x3boffset1 ]] && x3boffset="$x3boffset1" || x3boffset="$x3boffset3"
-				fi
-			else
-				if [[ $x3boffset1 -ge 0 ]]
-				then
-					x3boffset="$x3boffset1"
-				fi
-			fi
-		fi
-		
-		if [[ $x3boffset3 != "" ]]
-		then
-			if [[ $x3boffset1 != "" ]]
-			then
-				if [[ $x3boffset1 -ge 0 ]] && [[ $x3boffset3 -ge 0 ]]
-				then
-					[[ $x3boffset3 -gt $x3boffset1 ]] && x3boffset="$x3boffset1" || x3boffset="$x3boffset3"
-				fi
-			else
-				if [[ $x3boffset3 -ge 0 ]]
-				then
-					x3boffset="$x3boffset3"
-				fi
-			fi
-		fi
-		
-		if [[ $y1boffset1 != "" ]]
-		then
-			if [[ $y1boffset3 != "" ]]
-			then
-				if [[ $y1boffset1 -ge 0 ]] && [[ $y1boffset3 -ge 0 ]]
-				then
-					[[ $y1boffset3 -gt $y1boffset1 ]] && y1boffset="$y1boffset1" || y1boffset="$y1boffset3"
-				fi
-			else
-				if [[ $y1boffset1 -ge 0 ]]
-				then
-					y1boffset="$y1boffset1"
-				fi
-			fi
-		fi
-		
-		if [[ $y1boffset3 != "" ]]
-		then
-			if [[ $y1boffset1 != "" ]]
-			then
-				if [[ $y1boffset1 -ge 0 ]] && [[ $y1boffset3 -ge 0 ]]
-				then
-					[[ $y1boffset3 -gt $y1boffset1 ]] && y1boffset="$y1boffset1" || y1boffset="$y1boffset3"
-				fi
-			else
-				if [[ $y1boffset3 -ge 0 ]]
-				then
-					y1boffset="$y1boffset3"
-				fi
-			fi
-		fi
-		
-		if [[ $y3boffset1 != "" ]]
-		then
-			if [[ $y3boffset3 != "" ]]
-			then
-				if [[ $y3boffset1 -ge 0 ]] && [[ $y3boffset3 -ge 0 ]]
-				then
-					[[ $y3boffset3 -gt $y3boffset1 ]] && y3boffset="$y3boffset1" || y3boffset="$y3boffset3"
-				fi
-			else
-				if [[ $y3boffset1 -ge 0 ]]
-				then
-					y3boffset="$y3boffset1"
-				fi
-			fi
-		fi
-		
-		if [[ $y3boffset3 != "" ]]
-		then
-			if [[ $y3boffset1 != "" ]]
-			then
-				if [[ $y3boffset1 -ge 0 ]] && [[ $y3boffset3 -ge 0 ]]
-				then
-					[[ $y3boffset3 -gt $y3boffset1 ]] && y3boffset="$y3boffset1" || y3boffset="$y3boffset3"
-				fi
-			else
-				if [[ $y3boffset3 -ge 0 ]]
-				then
-					y3boffset="$y3boffset3"
-				fi
-			fi
-		fi
-		
-#		echo "Debug: $x1boffset1 $x1boffset3 | $x3boffset1 $x3boffset3 | $y1boffset1 $y1boffset3 | $y3boffset1 $y3boffset3"
-		
-		echo "Offset x1 (left) with value $x1boffset automatically acquired."
-		echo "Offset x3 (right) with value $x3boffset automatically acquired."
-		
-		echo "Offset y1 (up) with value $y1boffset automatically acquired."
-		echo "Offset y3 (down) with value $y3boffset automatically acquired."
 		
 		if [[ $x1boffset -lt 10 ]] && [[ $x3boffset -lt 10 ]] && [[ $y1boffset -lt 10 ]] && [[ $y3boffset -gt 20 ]]
 		then
 			y3boffset="$y1boffset"
-			echo "Offset y3 (down) too large. Setting y3 to y1 value $y1boffset"
+			[[ $quietness -lt 2 ]] && echo "Offset y3 (down) too large. Setting y3 to y1 value $y1boffset"
 		fi
 		
 		diffy3boffy1boff=$(( $y3boffset - $y1boffset ))
@@ -822,51 +904,30 @@ do
 			if [[ $y3boffset -gt $y1boffset ]]
 			then
 				y3boffset="$y1boffset"
-				echo "Offset y3 (down) too large. Setting y3 to y1 value $y1boffset"
+				[[ $quietness -lt 2 ]] && echo "Offset y3 (down) too large. Setting y3 to y1 value $y1boffset"
 			else
 				y1boffset="$y3boffset"
-				echo "Offset y1 (up) too large. Setting y1 to y3 value $y3boffset"
+				[[ $quietness -lt 2 ]] && echo "Offset y1 (up) too large. Setting y1 to y3 value $y3boffset"
 			fi
 		fi
 		
 	fi
 	
 	fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font $font -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
-	echo "Font size $fontsize automatically selected as best fit."
+	[[ $quietness -lt 2 ]] && echo "Font size $fontsize automatically selected as best fit."
 	
-	if [[ $fontsize -lt 6 ]]
-	then
-					
-		while [[ $fontsize -lt 8 ]]
-		do
-			x1boffset=$(( $x1boffset + 5 ))
-			x3boffset=$(( $x3boffset + 5 ))
-			fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font $font -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
-		done
-					
-		echo "Font size too small. Automatically reajusted x1 (left) and x3 (right) to $x1boffset and $x3boffset."
-		echo "Font size automatically reajusted to $fontsize."
-					
-	fi
+	font_size_optimizer
 	
-	if [[ $fontsize -gt 14 ]] && [[ $fontsize -le 28 ]] && [[ $optimize == "manga" ]]
-	then
-		fontsize=14
-		echo "Font size too large. Resizing to $fontsize."
-	fi
-	
-	if [[ $fontsize -gt 28 ]] && [[ $optimize == "manga" ]]
-	then
-		fontsize=26
-		echo "Font size too large. Resizing to $fontsize."
-	fi
-	
-#	read -p "Press enter to continue..."
+	fontcolor="black"
+	fontweight="normal"
+	fontstyle="normal"
+	fontstrokecolor="none"
+	fontstrokewidth="0"
 	
 	while true
 	do
 
-		echo "Translated string: $transstring"
+		[[ $quietness -lt 2 ]] && echo "Selected translated string: $transstring"
 	
 		if [[ $mode == "interactive" ]] || [[ $mode == "interactive-typeset-from-file" ]]
 		then
@@ -880,56 +941,39 @@ do
 				
 				fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font $font -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
 				echo "Font size $fontsize automatically selected as best fit."
-	
-				if [[ $fontsize -lt 6 ]]
-				then
-					
-					while [[ $fontsize -lt 8 ]]
-					do
-						x1boffset=$(( $x1boffset + 5 ))
-						x3boffset=$(( $x1boffset + 5 ))
-						fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font $font -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
-					done
-					
-					echo "Font size too small. Automatically ajusted x1 (left) and x3 (right) to $x1boffset and $x3boffset"	
-					echo "Font size automatically reajusted to $fontsize."
-					
-				fi
-	
-				if [[ $fontsize -gt 14 ]] && [[ $fontsize -le 28 ]] && [[ $optimize == "manga" ]]
-				then
-					fontsize=14
-					echo "Font size too large. Resizing to $fontsize."
-				fi
 				
-				if [[ $fontsize -gt 28 ]] && [[ $optimize == "manga" ]]
-				then
-					fontsize=26
-					echo "Font size too large. Resizing to $fontsize."
-				fi
+				font_size_optimizer
 				
 			fi
 			
 		fi
 		
+		sleep 1
+		clsfillcolor=$("$IMAGEMAGICKDIR"/convert.exe $img -gravity northwest -crop 1x1+$(( ($x3b + $x1b) / 2 ))+$(($y1b - 5)) txt:- | awk -F " " '{print $3}' | tail -n +2)
+		
 		if [[ $optimize == "manga" ]]
 		then
 		
 			sleep 1
-			"$IMAGEMAGICKDIR"/convert.exe $imgconvtmp -fill white -stroke none -draw "rectangle $(($x1b - 5)),$(($y1b - 5)) $(($x3b + 5)),$(($y3b + 5))" $imgconv
-
+			[[ $quietness -gt 0 ]] && "$IMAGEMAGICKDIR"/convert.exe $imgconv -fill "$clsfillcolor" -stroke none -draw "rectangle $(($x1b - 5)),$(($y1b - 5)) $(($x3b + 5)),$(($y3b + 5))" $imgconv
+			[[ $quietness -lt 1 ]] && "$IMAGEMAGICKDIR"/convert.exe $imgconvtmp -fill "$clsfillcolor" -stroke none -draw "rectangle $(($x1b - 5)),$(($y1b - 5)) $(($x3b + 5)),$(($y3b + 5))" $imgconv
+			
 			sleep 1
-			"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill white -stroke none -draw "arc $(($x1b - 5 - $x1boffset)),$(($y1b - 5 - $y1boffset)) $(($x3b + 5 + $x3boffset)),$(($y3b + 5 + $y3boffset)) 0,360" $imgconv
-
-		else
-
-			sleep 1
-			"$IMAGEMAGICKDIR"/convert.exe $imgconvtmp -fill white -stroke none -draw "rectangle $(($x1b - 5 - $x1boffset)),$(($y1b - 5 - $y1boffset)) $(($x3b + 5 + $x3boffset)),$(($y3b + 5 + $y3boffset))" $imgconv
+			"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill "$clsfillcolor" -stroke none -draw "arc $(($x1b - 5 - $x1boffset)),$(($y1b - 5 - $y1boffset)) $(($x3b + 5 + $x3boffset)),$(($y3b + 5 + $y3boffset)) 0,360" $imgconv
 
 		fi
 		
+		if [[ $optimize == "webtoon" ]] || [[ $optimize == "none" ]]
+		then
+
+			sleep 1
+			[[ $quietness -gt 0 ]] && "$IMAGEMAGICKDIR"/convert.exe $imgconv -fill "$clsfillcolor" -stroke none -draw "rectangle $(($x1b - 5)),$(($y1b - 5)) $(($x3b + 5)),$(($y3b + 5))" $imgconv
+			[[ $quietness -lt 1 ]] && "$IMAGEMAGICKDIR"/convert.exe $imgconvtmp -fill "$clsfillcolor" -stroke none -draw "rectangle $(($x1b - 5)),$(($y1b - 5)) $(($x3b + 5)),$(($y3b + 5))" $imgconv
+
+		fi	
+		
 		sleep 1
-		"$IMAGEMAGICKDIR"/convert.exe $imgconv \( -font $font -fill black -pointsize $fontsize -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) -gravity center -background none caption:"$transstring" \) -gravity northwest -geometry +$(($x1b - $x1boffset))+$(($y1b - $y1boffset)) -composite $imgconv
+		"$IMAGEMAGICKDIR"/convert.exe $imgconv \( -font $font -pointsize $fontsize -fill $fontcolor -weight $fontweight -style $fontstyle -stroke $fontstrokecolor -strokewidth $fontstrokewidth -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) -gravity center -background none caption:"$transstring" \) -gravity northwest -geometry +$(($x1b - $x1boffset))+$(($y1b - $y1boffset)) -composite $imgconv
 
 		if [[ $mode == "interactive" ]] || [[ $mode == "interactive-typeset-from-file" ]]
 		then
@@ -947,9 +991,13 @@ do
 				elif [[ $string != N ]] && [[ $string != n ]] && [[ $string != No ]] && [[ $string != no ]]
 				then
 				
+					echo "Invalid option."
 					continue
 				
 				else
+					
+					sleep 1
+					cp $imgconv $imgconvtmp2
 					
 					sleep 1
 					"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill "rgba(228,237,47,0.5)" -stroke none -draw "rectangle $(($x1b - 5 - $x1boffset)),$(($y1b - 5 - $y1boffset)) $(($x3b + 5 + $x3boffset)),$(($y3b + 5 + $y3boffset))" $imgconv
@@ -960,105 +1008,254 @@ do
 					sleep 1
 					"$IMAGEMAGICKDIR"/convert.exe $imgconv \( ruler.png -alpha set -channel A -evaluate set 50% -rotate -90 \) -set colorspace sRGB -gravity northwest -geometry +$(($x1b - 10 - $x1boffset))+$(($y1b - 106 - $y1boffset)) -composite $imgconv
 				
+					echo "Welcome to basic typeset tweaker. "
+					echo
+					echo "1) Change offset values."
+					echo "2) Change font type."
+					echo "3) Change font size."
+					echo "4) Change font color."
+					echo "5) Change font style."
+					echo "6) Change font weight."
+					echo "7) Change font stroke color."
+					echo "8) Change font stroke width."
+					echo "9) Exit."
+					echo
+					
 					while true
 					do
-				
-						read -e -p "Type new x1 (left), x3 (right), y1 (up) and y3 (down) offsets ($x1boffset,$x3boffset,$y1boffset,$y3boffset) or press enter to continue... " string
-				
-						if [[ $string != "" ]]
-						then
-				
-							stringx1=$(echo $string | cut -d "," -f1)
-							stringx3=$(echo $string | cut -d "," -f2)
-							stringy1=$(echo $string | cut -d "," -f3)
-							stringy3=$(echo $string | cut -d "," -f4)
 					
-							if [[ "$stringx1" =~ ^-?[0-9]+$ ]] && [[ "$stringx3" =~ ^-?[0-9]+$ ]] && [[ "$stringy1" =~ ^-?[0-9]+$ ]] && [[ "$stringy3" =~ ^-?[0-9]+$ ]] 
-							then
+						echo "Current Values -> Offset: ($x1boffset,$x3boffset,$y1boffset,$y3boffset) | Font: $font | Font Size: $fontsize | Font Color: $fontcolor | Font Weight: $fontweight | Font Style: $fontstyle | Font Stroke Color: $fontstrokecolor | Font Stroke Width: $fontstrokewidth"
 						
-								x1boffset="$stringx1"
-								x3boffset="$stringx3"
-								y1boffset="$stringy1"
-								y3boffset="$stringy3"
-								
-								sleep 1
-								cp $imgconv $imgconvtmp2
-								
-								sleep 1
-								"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill "rgba(23,235,108,0.5)" -stroke none -draw "rectangle $(($x1b - 5 - $x1boffset)),$(($y1b - 5 - $y1boffset)) $(($x3b + 5 + $x3boffset)),$(($y3b + 5 + $y3boffset))" $imgconv
+						read -e -p "Type the number corresponding to one of the preceding options... " string
+						
+						case "$string" in
+						
+							1)
 							
-								fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font $font -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
-								echo "Font size $fontsize automatically selected as best fit."
+								read -e -p "Type new x1 (left), x3 (right), y1 (up) and y3 (down) offsets ($x1boffset,$x3boffset,$y1boffset,$y3boffset) or press enter to continue... " string
+				
+								if [[ $string != "" ]]
+								then
 						
-								read -e -p "Do you wish to continue (y/n)? " string
-		
-								if [[ $string == Y ]] || [[ $string == y ]] || [[ $string == Yes ]] || [[ $string == yes ]]
-								then
-									
-									break
-				
-								elif [[ $string != N ]] && [[ $string != n ]] && [[ $string != No ]] && [[ $string != no ]]
-								then
+									stringx1=$(echo $string | cut -d "," -f1)
+									stringx3=$(echo $string | cut -d "," -f2)
+									stringy1=$(echo $string | cut -d "," -f3)
+									stringy3=$(echo $string | cut -d "," -f4)								
+							
+									if [[ "$stringx1" =~ ^-?[0-9]+$ ]] && [[ "$stringx3" =~ ^-?[0-9]+$ ]] && [[ "$stringy1" =~ ^-?[0-9]+$ ]] && [[ "$stringy3" =~ ^-?[0-9]+$ ]] 
+									then
+										
+										sleep 1
+										cp $imgconv $imgconvtmp3
+										
+										sleep 1
+										"$IMAGEMAGICKDIR"/convert.exe $imgconv -fill "rgba(23,235,108,0.5)" -stroke none -draw "rectangle $(($x1b - 5 - $stringx1)),$(($y1b - 5 - $stringy1)) $(($x3b + 5 + $stringx3)),$(($y3b + 5 + $stringy3))" $imgconv		
 								
-									echo "Invalid option."
-									break
-				
+										while true
+										do
+								
+											read -e -p "Do you wish to save your inputed offset values (y/n)? " string
+					
+											if [[ $string == Y ]] || [[ $string == y ]] || [[ $string == Yes ]] || [[ $string == yes ]]
+											then
+												
+												x1boffset="$stringx1"
+												x3boffset="$stringx3"
+												y1boffset="$stringy1"
+												y3boffset="$stringy3"
+												fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font $font -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
+												echo "Font size $fontsize automatically selected as best fit."
+												sleep 1
+												mv $imgconvtmp3 $imgconv
+												continue 2
+							
+											elif [[ $string != N ]] && [[ $string != n ]] && [[ $string != No ]] && [[ $string != no ]]
+											then
+											
+												echo "Invalid option."
+												continue
+							
+											else
+											
+												sleep 1
+												mv $imgconvtmp3 $imgconv
+												continue 2
+									
+											fi
+											
+										done
+									
+									else
+								
+										echo "Typed input is not number seperated list."
+										continue
+									
+									fi
+									
 								else
 								
-									sleep 1
-									mv $imgconvtmp2 $imgconv
 									continue
-						
+							
 								fi
 							
-							else
-						
-								echo "Typed input is not number seperated list."
-								break
+							;;
 							
-							fi
+							2)
 							
-						else
-						
-							break
+								read -e -p "Type new font type ($font) or press enter to continue... " string
+
+								if [[ $string != "" ]]
+								then
+
+									"$IMAGEMAGICKDIR"/convert.exe -list font | grep "Font:" | cut -d " " -f4 | grep -w "$string" &>> /dev/null
+									if [[ $? != 0 ]]
+									then
+										echo "Font $string does not exist."
+										continue
+									else
+										font="$string"
+										fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font $font -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
+										echo "Font size $fontsize automatically selected as best fit."
+										continue
+									fi
 					
-						fi
+								fi
+							
+							;;
+							
+							3)
+							
+								read -e -p "Type new font size ($fontsize) or press enter to continue... " string
 				
+								if [[ $string != "" ]]
+								then
+
+									if [[ "$string" =~ ^[0-9]+$ ]]
+									then
+										[[ $string -gt $fontsize ]] && echo "Typed input is greater than recommended best fit. Clipping is likely to occur."
+										fontsize="$string"
+										continue
+									else
+										echo "Typed input is not a whole number."
+										continue
+									fi
+									
+								fi
+							
+							;;
+							
+							4) 
+							
+								echo "Typical colors: white black red orange yellow green cyan blue purple"
+								
+								read -e -p "Type new font color ($fontcolor) or press enter to continue... " string
+				
+								if [[ $string != "" ]]
+								then
+
+									fontcolor="$string"
+									
+								fi
+								
+							;;
+							
+							5) 
+							
+								echo "Available styles: normal italic oblique"
+								
+								read -e -p "Type new font style ($fontstyle) or press enter to continue... " string
+				
+								if [[ $string != "" ]]
+								then
+
+									if [[ "$string" == "normal" ]] || [[ "$string" == "italic" ]] || [[ "$string" == "oblique" ]] 
+									then
+										fontstyle="$string"
+										continue
+									else
+										echo "Invalid style."
+										continue
+									fi
+									
+								fi
+								
+							;;
+							
+							6)
+							
+								echo "Available weights: thin extralight light normal medium demibold bold extrabold heavy"
+								
+								read -e -p "Type new font weight ($fontweight) or press enter to continue... " string
+				
+								if [[ $string != "" ]]
+								then
+
+									if [[ "$string" == "thin" ]] || [[ "$string" == "extralight" ]] || [[ "$string" == "light" ]] || [[ "$string" == "normal" ]] || [[ "$string" == "medium" ]] || [[ "$string" == "demibold" ]] || [[ "$string" == "bold" ]] || [[ "$string" == "extrabold" ]] || [[ "$string" == "heavy" ]]
+									then
+										fontweight="$string"
+										continue
+									else
+										echo "Invalid weight."
+										continue
+									fi
+									
+								fi
+							
+							;;
+							
+							7) 
+							
+								echo "Typical colors: white black red orange yellow green cyan blue purple"
+								
+								read -e -p "Type new font stroke color ($fontstrokecolor) or press enter to continue... " string
+				
+								if [[ $string != "" ]]
+								then
+
+									fontstrokecolor="$string"
+									
+								fi
+								
+							;;
+
+							8)
+							
+								read -e -p "Type new font stroke width ($fontstrokewidth) or press enter to continue... " string
+				
+								if [[ $string != "" ]]
+								then
+
+									if [[ "$string" =~ ^[0-9]+$ ]]
+									then
+										fontstrokewidth="$string"
+										continue
+									else
+										echo "Typed input is not a whole number."
+										continue
+									fi
+									
+								fi
+							
+							;;
+							
+							9)
+							
+								sleep 1
+								mv $imgconvtmp2 $imgconv
+								break 2
+								
+							;;
+							
+							*)
+							
+								echo "Invalid option."
+								continue
+							
+							;;
+						
+						esac
+						
 					done
-				
-					read -p "Type new font type or press enter to continue... " string
-
-					if [[ $string != "" ]]
-					then
-
-						"$IMAGEMAGICKDIR"/convert.exe -list font | grep "Font:" | cut -d " " -f4 | grep -w "$string" &>> /dev/null
-						if [[ $? != 0 ]]
-						then
-							echo "Font $string does not exist."
-						else
-							font="$string"
-							fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font $font -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
-							echo "Font size $fontsize automatically selected as best fit."
-						fi
-					
-					fi
-				
-					read -p "Type new font size or press enter to continue... " string
-				
-					if [[ $string == "" ]]
-					then
-						break
-					fi
-				
-					if [[ "$string" =~ ^[0-9]+$ ]]
-					then
-						[[ $string -gt $fontsize ]] && echo "Typed input is greater than recommended best fit. Clipping is likely to occur."
-						fontsize="$string"
-						break
-					else
-						echo "Typed input is not a number."
-						break
-					fi
 				
 				fi
 			
@@ -1072,21 +1269,23 @@ do
 		
 	done
 	
-	rm $imgconvtmp
+	sleep 1
+	[[ $quietness -lt 1 ]] && rm $imgconvtmp
 	
 	i=$(($i+1))
 	
 done
 
-"$CMDDIR"/cmd.exe /c start taskkill /IM JPEGView.exe
+sleep 1
+[[ $quietness -lt 1 ]] && "$CMDDIR"/cmd.exe /c start taskkill /IM JPEGView.exe
 
 done
 
 echo "All images have been successfully processed."
 
-read -p "Place the all the images on the folder and then press any key or press enter to exit... " string
+[[ $quietness -lt 3 ]] && read -p "Place the all the images on the folder and then press any key or press enter to exit... " string2
 
-if [[ $string != "" ]]
+if [[ $string2 != "" ]]
 then
 
 	echo "Generating read.html... "
