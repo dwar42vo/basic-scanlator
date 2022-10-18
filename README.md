@@ -4,7 +4,7 @@ A basic bash script that extracts raw text using Google Vision API from a list o
 
 This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 (will probably also work on WSL 2) installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided; you must obtain them yourself by creating free Google Cloud and Deepl accounts.
 
-This script only supports Japanese, Chinese and Korean as source languages. The font used by this script is CC Wild Words Roman, but you can change it to any font you have installed on your system. 
+This script only supports Japanese, Chinese and Korean as source languages. The default font used by this script is CC Wild Words Roman, but you can change it to any font you have installed on your system. 
 
 Lastly, this script is a WIP. Unintended results are to be expected.
 
