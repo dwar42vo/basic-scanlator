@@ -93,7 +93,7 @@ Add your google and your deepl api keys to the gc_api_key and deepl_api_key vari
 
 # Features
 
-The script takes a number of arguments, 3 of which are required. These are "Source Language", "Target Language" and "Translation Engine". Other arguments, such as "Mode", "Font", "Image Format", "Optimizations" and "Translation File" are optional. There are also two other special arguments, "Quietness" (-q) and "Advance Typeset Mode" (-a). Quietness is value from 0 (default) to 3. The higher the value, the more output will be supressed. Advance Typeset Mode tries to find the edges of text bubbles and sets the offsets accordingly.
+The script takes a number of arguments, 3 of which are required. These are "Source Language", "Target Language" and "Translation Engine". Other arguments, such as "Mode", "Font", "Image Format", "Optimizations" and "Translation File" are optional. There are also two other special arguments, "Quietness" (-q|-qq|-qqq) and "Advance Typeset Mode" (-a). Quietness is a value from 0 (default) to 3. The higher the value, the more output will be supressed. Advance Typeset Mode tries to find the edges of text bubbles and sets the offsets accordingly.
 
 The valid values for each of these are:
 
