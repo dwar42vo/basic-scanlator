@@ -2,7 +2,7 @@
 
 A basic bash script that extracts raw text using Google Vision API from a list of manga or webtoon JPG images, translates the extracted raw text using Google Translate API or Deepl Translate API and typesets the result onto the images. 
 
-This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 (will probably also work on WSL 2) installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided; you must obtain them yourself by creating a free Google Cloud and Deepl accounts.
+This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 (will probably also work on WSL 2) installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided; you must obtain them yourself by creating free Google Cloud and Deepl accounts.
 
 This script only supports Japanese, Chinese and Korean as source languages. The font used by this script is CC Wild Words Roman, but you can change it to any font you have installed on your system. 
 
@@ -20,7 +20,7 @@ WSL with Ubuntu 18.04 or 20.04 installed, [Cywin](https://www.cygwin.com/) [setu
 
 [JPEGView](https://sourceforge.net/projects/jpegview/files/latest/download) [JPEGView_1.0.37.zip]
 
-These last two should be installed on C:\Program Files
+These last two should be installed on C:\Program Files. JPEGView is optional if quietness is set to a value between 1 and 3.
 
 ## Command Line
 
@@ -93,7 +93,7 @@ Add your google and your deepl api keys to the gc_api_key and deepl_api_key vari
 
 # Features
 
-The script takes 6 arguments, which are "Source Language", "Target Language", "Translation Engine", "Mode", "Font" and "Translation File". Mode, Font and Translation File are optional. 
+The script takes a number of arguments, 3 of which are required. These are "Source Language", "Target Language" and "Translation Engine". Other arguments, such as "Mode", "Font", "Image Format", "Optimizations", "Translation File" and "Quietness" are optional. 
 
 The valid values for each of these are:
 
@@ -104,6 +104,10 @@ The valid values for each of these are:
 3. Translation Engine: google and deepl
     
 4. Mode: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file and interactive-typeset-from-file
+
+5. Optimizations: webtoon (default) and manga
+
+6. Image Format: jpg (default), png and webp
     
     - Interactive: Requests user input for a number of things, namely changing either the extracted raw text or the translated text before typesetting, setting new offset values for text boxes and font sizes. 
         
@@ -119,12 +123,12 @@ The valid values for each of these are:
 
 # Usage
 
-First off, place the script on the same folder as the manga or webtoon JPG images you wish to process, and then run the script with the intended arguments. If you're running the beta version, you will also need to place the ruler.png file on the same folder as the script and images.
+First off, place the script on the same folder as the manga or webtoon images you wish to process, and then run the script with the intended arguments.
 
 The order the arguments should follow is:
 
 ```
-./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -r transfile ) ( -o type )
+./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -i format ) ( -o manga|webtoon ) ( -r transfile )
 ```
 
 ## Examples 
@@ -139,11 +143,11 @@ If you wish to translate a Japanese manga to English interactively, run:
 https://user-images.githubusercontent.com/110120271/181649471-15220046-9bfa-4c02-aa83-957bfe0fb84c.mp4
 
 
-If you wish to translate a Korean webtoon to English with your own translation, create a file named transtext.txt, place it on the same folder as the script and the JPG images you wish to process and add in your translated text. 
+If you wish to translate a Korean webtoon to English with your own translation, create a file named transtext.txt, place it on the same folder as the script and the images you wish to process and add in your translated text. 
 
 This file cannot contain any carriage return characters. You can use Notepad++ to convert the end of lines to Unix format if needed (Edit -> EOL Converversion -> Unix). 
 
-If you type the word "ignore" on the transtext.txt file, the text block the script is currently on will be skipped; this is useful to avoid SFX.
+If you type the word "Ignore" on the transtext.txt file, the text block the script is currently on will be skipped; this is useful to avoid SFX and watermarks.
 
 ```
 ./basic_scanlator.sh -s ko -t en -e google -m typeset-from-file
