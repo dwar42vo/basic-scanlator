@@ -128,7 +128,7 @@ First off, place the script on the same folder as the manga or webtoon images yo
 The order the arguments should follow is:
 
 ```
-./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -i format ) ( -o manga|webtoon ) ( -r transfile ) (-q) (-a)
+./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -i image_format ) ( -o manga|webtoon ) ( -r transfile ) (-q|-qq|-qqq) (-a)
 ```
 
 ## Examples 
