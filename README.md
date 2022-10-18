@@ -93,7 +93,7 @@ Add your google and your deepl api keys to the gc_api_key and deepl_api_key vari
 
 # Features
 
-The script takes a number of arguments, 3 of which are required. These are "Source Language", "Target Language" and "Translation Engine". Other arguments, such as "Mode", "Font", "Image Format", "Optimizations", "Translation File" and "Quietness" are optional. 
+The script takes a number of arguments, 3 of which are required. These are "Source Language", "Target Language" and "Translation Engine". Other arguments, such as "Mode", "Font", "Image Format", "Optimizations" and "Translation File" are optional. There are also two other special arguments, "Quietness" (-q) and "Advance Typeset Mode" (-a). Quietness is value from 0 (default) to 3. The higher the value, the more output will be supressed. Advance Typeset Modtries to find the edges of text bubbles and sets the offsets accordingly.
 
 The valid values for each of these are:
 
@@ -128,7 +128,7 @@ First off, place the script on the same folder as the manga or webtoon images yo
 The order the arguments should follow is:
 
 ```
-./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -i format ) ( -o manga|webtoon ) ( -r transfile )
+./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -i format ) ( -o manga|webtoon ) ( -r transfile ) (-q) (-a)
 ```
 
 ## Examples 
