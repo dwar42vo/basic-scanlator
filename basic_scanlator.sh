@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Original Author: Dwarvo Lasorsk
-# Current Revision: 20220819 (v0.8)
+# Current Revision: 20220928 (v0.9)
 
 # Prerequite Packages: apt-get install coreutils grep curl jq
 
@@ -19,7 +19,7 @@ deepl_api_key="..."
 # Argument Parsing
 if [[ $# -eq 0 ]]
 then
-	echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -o manga|webtoon ) ( -r transfile )\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file\n\n\tAvailable Optimizations: webtoon (default), manga\n"
+	echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -i format ) ( -o manga|webtoon ) ( -r transfile )\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
 	exit 1
 fi
 
@@ -30,7 +30,7 @@ then
 		
 		-h|--help)
 			
-			echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -o manga|webtoon ) ( -r transfile )\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file\n\n\tAvailable Optimizations: webtoon (default), manga\n"
+			echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -i format ) ( -o manga|webtoon ) ( -r transfile )\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
 			exit 1
 			;;
 		
@@ -358,31 +358,24 @@ find_box_border_coordinates () {
 	if [[ $9 == 1 ]] && [[ $8 == x ]]; then xcrop="200"; ycrop="1"; mirror=""; offoper="+"; fi 
 	if [[ $9 == 1 ]] && [[ $8 == y ]]; then xcrop="1"; ycrop="200"; mirror=""; offoper="+"; fi
 	
-	for line in $( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -alpha off -gravity northwest -crop $xcrop\x$ycrop+$1+$2 $mirror txt:- | awk -F " " '{print $1$2}' | tail -n +2 ) 
-	do
-	
-#		echo "Debug: $line"
-		color=$( echo $line | cut -d ":" -f2 | tr -d "(" | tr -d ")" ) 
-		if [[ $color -le 128 ]] 
-		then 
+	pixelcolor=$( "$IMAGEMAGICKDIR"/convert.exe $img -set colorspace Gray -alpha off -gravity northwest -crop $xcrop\x$ycrop+$1+$2 $mirror txt:- | awk -F " " '{print $1$2}' | tail -n +2 | grep -E -m 1 "\([1-9]\)$|\([1-9][0-9]\)$|\(1[0-2][0-9]\)$" ) 
+
+	if [[ $pixelcolor != "" ]]
+	then 
 			
 			if [[ $8 == x ]]
 			then
-				offset=$(( $(echo "$line" | cut -d ":" -f1 | cut -d "," -f1 ) - $3 ))
+				offset=$(( $(echo "$pixelcolor" | cut -d ":" -f1 | cut -d "," -f1 ) - $3 ))
 				[[ $quietness -lt 1 ]] && "$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $(( $4 $offoper $offset )),$5 $(( $6 $offoper $offset )),$7" $imgconv
 			fi
 			
 			if [[ $8 == y ]] 
 			then
-				offset=$(( $(echo "$line" | cut -d ":" -f1 | cut -d "," -f2 ) - $3 ))
+				offset=$(( $(echo "$pixelcolor" | cut -d ":" -f1 | cut -d "," -f2 ) - $3 ))
 				[[ $quietness -lt 1 ]] && "$IMAGEMAGICKDIR"/convert.exe $imgconv -fill red -stroke black -draw "circle $4,$(( $5 $offoper $offset )) $6,$(( $7 $offoper $offset ))" $imgconv
 			fi
-				
-			break
 		
-		fi
-	
-	done
+	fi
 	
 	echo $offset
 
@@ -412,7 +405,7 @@ box_border_coordinates_pick_min () {
 
 font_size_optimizer () {
 
-	[[ $optimize == "manga" ]] && ifs=("0" "6" "8" "14" "18" "22" "26" "32" "38");
+	[[ $optimize == "manga" ]] && ifs=("0" "6" "8" "14" "18" "26" "32" "58" "78");
 	[[ $optimize == "webtoon" ]] && ifs=("0" "12" "16" "22" "26" "30" "34" "40" "46");
 
 	if [[ $fontsize -lt ${ifs[1]} ]]
@@ -430,15 +423,16 @@ font_size_optimizer () {
 					
 	fi
 	
-	if [[ $fontsize -gt ${ifs[3]} ]] && [[ $fontsize -le ${ifs[5]} ]]
+	if [[ $fontsize -gt ${ifs[3]} ]] && [[ $fontsize -le ${ifs[4]} ]]
 	then
 		fontsize=${ifs[3]}
 		[[ $quietness -lt 2 ]] && echo "Font size too large. Resizing to $fontsize."
 	fi
 	
-	if [[ $fontsize -gt ${ifs[5]} ]] && [[ $fontsize -le ${ifs[7]} ]]
+	if [[ $fontsize -gt ${ifs[4]} ]] && [[ $fontsize -le ${ifs[7]} ]]
 	then
-		fontsize=${ifs[4]}
+		[[ $optimize == "manga" ]] && fontsize=$( printf "%.f\n" $( echo "$fontsize-($fontsize*(0.09*(($fontsize/10)+0.6)))" | bc -l ) )
+		[[ $optimize == "webtoon" ]] && fontsize=${ifs[4]}
 		[[ $quietness -lt 2 ]] && echo "Font size too large. Resizing to $fontsize."
 	fi
 	
@@ -609,7 +603,7 @@ do
 		
 	fi
 	
-	echo "Debug: X: $x1b $x2b $x3b $x4b || Y: $y1b $y2b $y3b $y4b"
+#	echo "Debug: X: $x1b $x2b $x3b $x4b || Y: $y1b $y2b $y3b $y4b"
 
 	imgconvtmpname=$( echo $imgconv | cut -d "." -f1 )
 	imgconvtmp=$( echo $imgconvtmpname\_tmp.png )
@@ -714,7 +708,7 @@ do
 	diffy2bny1bn=$(( $y2bn - $y1bn ))
 	diffy4bny3bn=$(( $y4bn - $y3bn ))
 
-	if [[ $x1bn != "null" ]] && [[ $y1bn -gt $y3b ]] && [[ $y1bn -lt $(( $y3b + (($y3b - $y1b) / $breakcont) )) ]] && [[ ${diffy2bny1bn/#-/} -lt 5 ]] && [[ ${diffy4bny3bn/#-/} -lt 5 ]] && [[ $sourcelang != "ja" ]]
+	if [[ $x1bn != "null" ]] && [[ $y1bn != "null" ]] && [[ $x1bn -lt $x3b ]] && [[ $x3bn -gt $x1b ]] && [[ $y1bn -gt $y3b ]] && [[ $y1bn -lt $(( $y3b + (($y3b - $y1b) / $breakcont) )) ]] && [[ ${diffy2bny1bn/#-/} -lt 5 ]] && [[ ${diffy4bny3bn/#-/} -lt 5 ]] && [[ $sourcelang != "ja" ]]
 	then
 		nextblockjoin=1
 		prevrawstring="$rawstring"
@@ -798,6 +792,12 @@ do
 			transstringcount=$(( $transstringcount + 1 ))
 			transstring=$(cat $transfile | tail -n +$transstringcount | head -n +1)
 			
+			if [[ $transstring == "---" ]]
+			then
+				transstringcount=$(( $transstringcount + 1 ))
+				transstring=$(cat $transfile | tail -n +$transstringcount | head -n +1)
+			fi
+			
 			if [[ $transstring == "Ignore" ]] || [[ $transstring == "ignore" ]]
 			then
 				sleep 1
@@ -857,8 +857,6 @@ do
 		y1boffset3=$( find_box_border_coordinates $x3b $(( $y1b - 200 )) 20 $x3b $(( $y1b - 20 )) $(( $x3b + 2 )) $(( $y1b - 20 )) y 0 )
 		y3boffset3=$( find_box_border_coordinates $x3b $(( $y3b + 5 )) 15 $x3b $(( $y3b + 20 )) $(( $x3b + 2 )) $(( $y3b + 20 )) y 1 )
 		
-		echo "Debug: $x1boffset1 $x1boffset3 | $x3boffset1 $x3boffset3 | $y1boffset1 $y1boffset3 | $y3boffset1 $y3boffset3"
-		
 		x1boffsettmp=$( box_border_coordinates_pick_min $x1boffset1 $x1boffset3 )
 		[[ $x1boffsettmp != "" ]] && x1boffset=$x1boffsettmp
 		x1boffsettmp=$( box_border_coordinates_pick_min $x1boffset3 $x1boffset1 )
@@ -877,7 +875,7 @@ do
 		y3boffsettmp=$( box_border_coordinates_pick_min $y3boffset3 $y3boffset1 )
 		[[ $y3boffsettmp != "" ]] && y3boffset=$y3boffsettmp
 		
-		echo "Debug2: $x1boffset1 $x1boffset3 | $x3boffset1 $x3boffset3 | $y1boffset1 $y1boffset3 | $y3boffset1 $y3boffset3"
+#		echo "Debug: $x1boffset1 $x1boffset3 | $x3boffset1 $x3boffset3 | $y1boffset1 $y1boffset3 | $y3boffset1 $y3boffset3"
 		
 		[[ $quietness -lt 2 ]] && echo "Offset x1 (left) with value $x1boffset automatically acquired."
 		[[ $quietness -lt 2 ]] && echo "Offset x3 (right) with value $x3boffset automatically acquired."
@@ -949,7 +947,7 @@ do
 		fi
 		
 		sleep 1
-		clsfillcolor=$("$IMAGEMAGICKDIR"/convert.exe $img -gravity northwest -crop 1x1+$(( ($x3b + $x1b) / 2 ))+$(($y1b - 5)) txt:- | awk -F " " '{print $3}' | tail -n +2)
+		clsfillcolor=$("$IMAGEMAGICKDIR"/convert.exe $img -gravity northwest -crop 1x1+$(( ($x3b + $x1b) / 2 ))+$(($y1b - 8)) txt:- | awk -F " " '{print $3}' | tail -n +2)
 		
 		if [[ $optimize == "manga" ]]
 		then
@@ -1275,6 +1273,9 @@ do
 	i=$(($i+1))
 	
 done
+
+echo "---" >> rawtext.txt
+echo "---" >> autotranstext.txt
 
 sleep 1
 [[ $quietness -lt 1 ]] && "$CMDDIR"/cmd.exe /c start taskkill /IM JPEGView.exe
