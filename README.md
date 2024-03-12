@@ -138,7 +138,7 @@ The order the arguments should follow is:
 If you wish to translate a Japanese manga to English interactively, run:
 
 ```
-./basic_scanlator.sh -s jp -t en -e deepl
+./basic_scanlator.sh -s jp -t en -e deepl -m interactive
 ```
 
 
