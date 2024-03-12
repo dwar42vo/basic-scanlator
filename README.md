@@ -168,7 +168,7 @@ If you type the word "Ignore" on the transtext.txt file, the text block the scri
 
 https://user-images.githubusercontent.com/110120271/181768039-b538a0cc-c13f-4564-a324-ab3dc635ddc3.mp4
 
-Other examples:
+### Other Examples
 
 
 ```
