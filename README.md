@@ -119,7 +119,7 @@ The valid values for each of these are:
         
     - Typeset from File: Uses a text file named transtext.txt for the translated text. The translated strings on the file should follow the order by which Google Vision API extracts text and not the order of the various text bubbles.
     
-    - Typeset from All: Uses a text file named all.txt for the translated text, bounding box coordinates and offsets, font name, font size, font color and text bubble clear color.
+    - Typeset from All: Uses a text file named all.txt for the translated text, bounding box coordinates and offsets, font name, font size, font color and text bubble clean color.
         
     - Interactive Typeset from File: A combination of "Interactive" and "Typeset from file".
 
@@ -165,13 +165,13 @@ Other examples:
 ./basic_scanlator.sh -s ko -t en -e google -m automatic -a -q -w 190 1340 --w1p bl -d
 ```
 
-Explanation: Translate from Korean to English with Google Translate automatically. Use font Arial (default). Font color black (default). Clear text bubbles with color white (-c) (default). Enable webtoon optimatizations (default) (-o). Find text bubble border edges before typeseting (-a). Don't open images on GUI (-q). Conceal watermark on bottom left (--w1p bl) edge of the images with top right box coordinate at x=190 y=1340 (-w 190 1340). Show debug messages (-d).
+Explanation: Translate from Korean to English with Google Translate automatically. Use font Arial (default). Font color black (default). Clean text bubbles with color white (-c) (default). Enable webtoon optimatizations (default) (-o). Find text bubble border edges before typeseting (-a). Don't open images on GUI (-q). Conceal watermark on bottom left (--w1p bl) edge of the images with top right box coordinate at x=190 y=1340 (-w 190 1340). Show debug messages (-d).
 
 
 ```
 ./basic_scanlator.sh -s zh -t en -e deepl -m typeset-from-file -f CC-Wild-Words-Roman --fmin 12 --fmax 22 --font-color Red -cc -o manga -a -q -w 190 1340 --w1p bl -g 
 ```
 
-Explanation: Translate from Chinese to English with Deepl Translate. Use translated strings from transtext.txt. Use font CC-Wild-Words-Roman. Min font size 12. Max font size 22. Font color red. Clear text bubbles with color of bubbles (-cc). Enable manga optimatizations (-o). Find text bubble border edges before typeseting (-a). Don't open images on GUI (-q). Conceal watermark on bottom left (--w1p bl) edge of the images with top right box coordinate at x=190 y=1340 (-w 190 1340). Generate a .html page of the processed images (-g).
+Explanation: Translate from Chinese to English with Deepl Translate. Use translated strings from transtext.txt. Use font CC-Wild-Words-Roman. Min font size 12. Max font size 22. Font color red. Clean text bubbles with color of bubbles (-cc). Enable manga optimatizations (-o). Find text bubble border edges before typeseting (-a). Don't open images on GUI (-q). Conceal watermark on bottom left (--w1p bl) edge of the images with top right box coordinate at x=190 y=1340 (-w 190 1340). Generate a .html page of the processed images (-g).
 
 
