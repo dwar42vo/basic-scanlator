@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Original Author: Dwarvo Lasorsk
-# Current Revision: 20240110 (v0.11f)
+# Current Revision: 20240312 (v0.11g)
 
 # Prerequite Packages: apt-get install coreutils grep curl jq
 
@@ -17,7 +17,7 @@ deepl_api_key=""
 # Argument Parsing
 if [[ $# -eq 0 ]]
 then
-	echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -i format ) ( -o manga|webtoon ) ( -r transfile )\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, typeset-from-all, interactive-typeset-from-file\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
+	echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( -r transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (-cc) (-a) (-g) (-q|-qq|-qqq) (-d)\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file, typeset-from-all\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
 	exit 1
 fi
 
@@ -28,7 +28,7 @@ then
 		
 		-h|--help)
 			
-			echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -i format ) ( -o manga|webtoon ) ( -r transfile )\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, typeset-from-all, interactive-typeset-from-file\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
+			echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( -r transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (-cc) (-a) (-g) (-q|-qq|-qqq) (-d)\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file, typeset-from-all\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
 			exit 1
 			;;
 		
@@ -692,8 +692,31 @@ do
 	if [[ $mode == "typeset-from-all" ]]
 	then
 	
-		while [[ $transstringcount -lt "$( cat all.txt | wc -l )" ]]
+		while true
 		do
+		
+			[[ "$transstringcount" -gt "$( cat all.txt | wc -l )" ]] && break
+		
+			[[ $debug == 1 ]] && echo "Debug: [[ $skip_next_image == 1 ]]" 
+			if [[ $skip_next_image == 1 ]]
+			then
+				echo "Image number mismatch. Skipping to next image."
+				transstringcount=$(($transstringcount+6))
+				skip_next_image=0
+				sleep 1
+				[[ $quietness -lt 1 ]] && "$CMDDIR"/cmd.exe /c start taskkill /IM JPEGView.exe
+				continue 2
+			fi
+			
+			[[ $debug == 1 ]] && echo "Debug: [[ $nximg -gt $( echo $img | cut -d "." -f1 ) ]]"
+			if [[ "$nximg" -gt "$( echo $img | cut -d "." -f1 )" ]]
+			then
+				echo "Image number mismatch. Skipping to next image."
+				skip_next_image=0
+				sleep 1
+				[[ $quietness -lt 1 ]] && "$CMDDIR"/cmd.exe /c start taskkill /IM JPEGView.exe
+				continue 2
+			fi
 
 			x1b=$( head -n +$transstringcount all.txt | tail -n -1 | awk -F "|" '{print $1}' | cut -d ":" -f2 | cut -d "," -f1 | tr -d " (" )
 			y1b=$( head -n +$transstringcount all.txt | tail -n -1 | awk -F "|" '{print $1}' | cut -d ":" -f2 | cut -d "," -f2 | tr -d " " | tr -d ")" )
@@ -747,8 +770,25 @@ do
 			sleep 1
 			"$IMAGEMAGICKDIR"/convert.exe $imgconv \( -font $font -pointsize $fontsize -fill $fontcolor -weight $fontweight -style $fontstyle -stroke $fontstrokecolor -strokewidth $fontstrokewidth -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) -gravity center -background none caption:"$transstring" \) -gravity northwest -geometry +$(($x1b - $x1boffset))+$(($y1b - $y1boffset)) -composite $imgconv
 
-			transstringcount=$(($transstringcount+6))
-
+			nximg=$( tail -n +$(( $transstringcount + 5 )) all.txt | head -n +1 | sed "s/\-//g" | sed "s/\ //g" | cut -d "." -f1 )
+		
+			[[ "$nximg" =~ ^[0-9]+$ ]] || nximg="" && ( [[ $debug == 1 ]] && echo "Debug: Current: $img | Next: $nximg.jpg | Count: $transstringcount" ) 
+											
+			if [[ "$nximg" != "" ]] && [[ "$nximg.jpg" != "$img" ]] 
+			then 
+				[[ $debug == 1 ]] && echo "Debug: $(($nximg-1)).jpg != $img"
+				if [[ "$(($nximg-1)).jpg" != "$img" ]]
+				then 
+					skip_next_image=1
+					break
+				else
+					transstringcount=$(($transstringcount+6))	
+					break
+				fi
+			else
+				transstringcount=$(($transstringcount+6))	
+			fi
+			
 		done
 		
 		sleep 1
@@ -1283,13 +1323,12 @@ do
 			fontstrokecolor="none"
 			fontstrokewidth="0"
 			
-			[[ $i == 0 ]] && echo "--- $imgconv ---" >> all.txt
+			echo "--- $imgconv ---" >> all.txt
 			echo "p1: ($x1b, $y1b) | p2: ($x2b, $y2b) | p3: ($x3b, $y3b) | p4: ($x4b, $y4b)" >> all.txt
 			echo "p1off: ($x1boffset, $y1boffset) | p3off: ($x3boffset, $y3boffset)" >> all.txt
 			echo "font: $font | font_size: $fontsize | font_color: $fontcolor | clean_fill_color: $clean_fill_color" >> all.txt
 			echo "raw_string: $rawstring" >> all.txt
 			echo "translated_string: $transstring" >> all.txt
-			echo "--- $imgconv ---" >> all.txt
 			
 			while true
 			do
