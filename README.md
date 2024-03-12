@@ -170,13 +170,11 @@ https://user-images.githubusercontent.com/110120271/181768039-b538a0cc-c13f-4564
 
 ### Other Examples
 
-
 ```
 ./basic_scanlator.sh -s ko -t en -e google -m automatic -a -q -w 190 1340 --w1p bl -d
 ```
 
 Explanation: Translate from Korean to English with Google Translate automatically. Use font Arial (default). Font color black (default). Clean text bubbles with color white (-c) (default). Enable webtoon optimatizations (default) (-o). Find text bubble border edges before typeseting (-a). Don't open images on GUI (-q). Conceal watermark on bottom left (--w1p bl) edge of the images with top right box coordinate at x=190 y=1340 (-w 190 1340). Show debug messages (-d).
-
 
 ```
 ./basic_scanlator.sh -s zh -t en -e deepl -m typeset-from-file -f CC-Wild-Words-Roman --fmin 12 --fmax 22 --font-color Red -cc -o manga -a -q -w 190 1340 --w1p bl -g 
@@ -184,4 +182,8 @@ Explanation: Translate from Korean to English with Google Translate automaticall
 
 Explanation: Translate from Chinese to English with Deepl Translate. Use translated strings from transtext.txt. Use font CC-Wild-Words-Roman. Min font size 12. Max font size 22. Font color red. Clean text bubbles with color of bubbles (-cc). Enable manga optimatizations (-o). Find text bubble border edges before typeseting (-a). Don't open images on GUI (-q). Conceal watermark on bottom left (--w1p bl) edge of the images with top right box coordinate at x=190 y=1340 (-w 190 1340). Generate a .html page of the processed images (-g).
 
+```
+./basic_scanlator.sh -s zh -t en -e deepl -m typeset-from-all -qqq -o manga
+```
+Explanation: Use translated strings, font and clean text bubbles color from all.txt Enable manga optimatizations (-o). No output (-qqq).
 
