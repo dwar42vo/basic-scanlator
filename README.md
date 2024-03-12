@@ -127,10 +127,15 @@ The valid values for each of these are:
 
 First off, place the script on the same folder as the manga or webtoon images you wish to process, and then run the script with the intended arguments.
 
-The order the arguments should follow is:
+The full list of arguments is as follows:
 
 ```
 ./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( -r transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (-cc) (-a) (-g) (-q|-qq|-qqq) (-d)
+```
+
+To get the full list of fonts installed on your system:
+```
+./basic_scanlator.sh -l
 ```
 
 ## Examples 
