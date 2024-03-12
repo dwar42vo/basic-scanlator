@@ -2,9 +2,9 @@
 
 A basic bash script that extracts raw text using Google Vision API from a list of manga or webtoon JPG images, translates the extracted raw text using Google Translate API or Deepl Translate API and typesets the result onto the images. 
 
-This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 (will probably also work on WSL 2) installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided; you must obtain them yourself by creating free Google Cloud and Deepl accounts.
+This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 (also works on WSL 2) installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided; you must obtain them yourself by creating free Google Cloud and Deepl accounts.
 
-This script only supports Japanese, Chinese and Korean as source languages. The default font used by this script is CC Wild Words Roman, but you can change it to any font you have installed on your system. 
+This script only supports Japanese, Chinese and Korean as source languages. The default font used by this script is Arial, but you can change it to any font you have installed on your system. 
 
 Lastly, this script is a WIP. Unintended results are to be expected.
 
@@ -81,9 +81,9 @@ Unlike Google Cloud, you don't have to worry about credit card charges.
 
 Add your google and your deepl api keys to the gc_api_key and deepl_api_key variables at top of the script. 
 
->gc_api_key="your-google-api-key" --> gc_api_key="a4db08b7-5729-4ba9-8c08-f2df493465a1"
+>gc_api_key="" --> gc_api_key="a4db08b7-5729-4ba9-8c08-f2df493465a1"
 >
->deepl_api_key="your-deepl-api-key" --> deepl_api_key="279a2e9d-83b3-c416-7e2d-f721593e42a0:fx"
+>deepl_api_key="" --> deepl_api_key="279a2e9d-83b3-c416-7e2d-f721593e42a0:fx"
 
 # Components
 
@@ -93,7 +93,7 @@ Add your google and your deepl api keys to the gc_api_key and deepl_api_key vari
 
 # Features
 
-The script takes a number of arguments, 3 of which are required. These are "Source Language", "Target Language" and "Translation Engine". Other arguments, such as "Mode", "Font", "Image Format", "Optimizations" and "Translation File" are optional. There are also two other special arguments, "Quietness" (-q|-qq|-qqq) and "Advance Typeset Mode" (-a). Quietness is a value from 0 (default) to 3. The higher the value, the more output will be supressed. Advance Typeset Mode tries to find the edges of text bubbles and sets the offsets accordingly.
+The script takes a number of arguments, 3 of which are required. These are "Source Language", "Target Language" and "Translation Engine". Other arguments, such as "Mode", "Font", "Input-Image-Format", "Optimizations", "Translation File" and "Generate Read File" are optional. There are also two other special arguments, "Quietness" (-q|-qq|-qqq), "Advance Typeset Mode" (-a) and "Debug" (-d). Quietness is a value from 0 (default) to 3. The higher the value, the more output will be supressed. Advance Typeset Mode tries to find the edges of text bubbles and sets the offsets accordingly.
 
 The valid values for each of these are:
 
@@ -103,15 +103,15 @@ The valid values for each of these are:
     
 3. Translation Engine: google and deepl
     
-4. Mode: interactive (default), automatic, ocr-only, no-typeset, typeset-from-file and interactive-typeset-from-file
+4. Mode: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file and typeset-from-all
 
 5. Optimizations: webtoon (default) and manga
 
 6. Image Format: jpg (default), png and webp
-    
-    - Interactive: Requests user input for a number of things, namely changing either the extracted raw text or the translated text before typesetting, setting new offset values for text boxes and font sizes. 
-        
+
     - Automatic: Runs without any user input. Extracts raw text, translates and typesets results.
+   
+    - Interactive: Requests user input for a number of things, namely changing either the extracted raw text or the translated text before typesetting, setting new offset values for text boxes and font sizes. 
         
     - OCR only: Only extracts raw text to a file named rawtext.txt.
     
@@ -128,7 +128,7 @@ First off, place the script on the same folder as the manga or webtoon images yo
 The order the arguments should follow is:
 
 ```
-./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -f font ) ( -i image_format ) ( -o manga|webtoon ) ( -r transfile ) (-q|-qq|-qqq) (-a)
+./basic_scanlator.sh [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( -r transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (-cc) (-a) (-g) (-q|-qq|-qqq) (-d)
 ```
 
 ## Examples 
@@ -156,6 +156,18 @@ If you type the word "Ignore" on the transtext.txt file, the text block the scri
 
 https://user-images.githubusercontent.com/110120271/181768039-b538a0cc-c13f-4564-a324-ab3dc635ddc3.mp4
 
+Other examples:
 
+```
+./basic_scanlator.sh -s ko -t en -e google -m automatic -a -q -w 190 1340 --w1p bl -d
+```
+
+Explanation: Translate from Korean to English with Google Translate automatically. Use font Arial (default). Font color black (default). Clear text bubbles with color white (-c) (default). Enable webtoon optimatizations (default) (-o). Find text bubble border edges before typeseting (-a). Don't open images on GUI (-q). Conceal watermark on bottom left (--w1p bl) edge of the images with top right box coordinate at x=190 y=1340 (-w 190 1340). Show debug messages (-d).
+
+```
+./basic_scanlator.sh -s zh -t en -e deepl -m typeset-from-file -f CC-Wild-Words-Roman --fmin 12 --fmax 22 --font-color Red -cc -o manga -a -q -w 190 1340 --w1p bl -g 
+```
+
+Explanation: Translate from Chinese to English with Deepl Translate. Use translated strings from transtext.txt. Use font CC-Wild-Words-Roman (default). Min font size 12. Max font size 22. Font color red. Clear text bubbles with color of bubbles (-cc). Enable manga optimatizations (-o). Find text bubble border edges before typeseting (-a). Don't open images on GUI (-q). Conceal watermark on bottom left (--w1p bl) edge of the images with top right box coordinate at x=190 y=1340 (-w 190 1340). Generate a .html page of the processed images (-g).
 
 
