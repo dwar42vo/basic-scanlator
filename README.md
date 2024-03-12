@@ -138,6 +138,11 @@ To get the full list of fonts installed on your system:
 ./basic_scanlator.sh -l
 ```
 
+To get the help message:
+```
+./basic_scanlator.sh -h
+```
+
 ## Examples 
 
 If you wish to translate a Japanese manga to English interactively, run:
