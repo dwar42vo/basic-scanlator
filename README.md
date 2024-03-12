@@ -113,13 +113,15 @@ The valid values for each of these are:
    
     - Interactive: Requests user input for a number of things, namely changing either the extracted raw text or the translated text before typesetting, setting new offset values for text boxes and font sizes. 
         
-    - OCR only: Only extracts raw text to a file named rawtext.txt.
+    - OCR Only: Only extracts raw text to a file named rawtext.txt.
     
-    - No typeset: Extracts raw text to a file named rawtext.txt and translation to a file named autotranstext.txt
+    - No Typeset: Extracts raw text to a file named rawtext.txt and translation to a file named autotranstext.txt
         
-    - Typeset from file: Uses a text file named transtext.txt as the translated text. The translated strings on the file should follow the order by which Google Vision API extracts text and not the order of the various text bubbles.
+    - Typeset from File: Uses a text file named transtext.txt for the translated text. The translated strings on the file should follow the order by which Google Vision API extracts text and not the order of the various text bubbles.
+    
+    - Typeset from All: Uses a text file named all.txt for the translated text, bounding box coordinates and offsets, font name, font size, font color and text bubble clear color.
         
-    - Interactive typeset from file: A combination of "Interactive" and "Typeset from file".
+    - Interactive Typeset from File: A combination of "Interactive" and "Typeset from file".
 
 # Usage
 
