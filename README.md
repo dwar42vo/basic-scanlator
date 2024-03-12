@@ -185,5 +185,5 @@ Explanation: Translate from Chinese to English with Deepl Translate. Use transla
 ```
 ./basic_scanlator.sh -s zh -t en -e deepl -m typeset-from-all -qqq -o manga
 ```
-Explanation: Use translated strings, font and clean text bubbles color from all.txt Enable manga optimatizations (-o). No output (-qqq).
+Explanation: Use translated strings, font and clean text bubbles color from all.txt. Enable manga optimatizations (-o). No output (-qqq).
 
