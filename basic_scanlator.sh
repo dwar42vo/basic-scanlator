@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Original Author: Dwarvo Lasorsk
-# Current Revision: 20240312 (v0.11g)
+# Current Revision: 20240621 (v0.11h)
 
 # Prerequite Packages: apt-get install coreutils grep curl jq
 
@@ -582,7 +582,7 @@ font_size_optimizer () {
 				fontsize=$("$IMAGEMAGICKDIR"/convert.exe -font $font -fill black -size $(( ($x3b + $x3boffset) - ($x1b - $x1boffset) ))x$(( ($y3b + $y3boffset) - ($y1b - $y1boffset) )) caption:"$transstring" -format "%[caption:pointsize]" info:)
 				
 				f2=$(date +%s)
-				if [[ $(($f2 - $f1)) -ge 600 ]]; then [[ $quietness -lt 2 ]] && echo "Font size optimizer function loop for small font sizes taking too long. Breaking..."; break; fi
+				if [[ $(($f2 - $f1)) -ge 300 ]]; then [[ $quietness -lt 2 ]] && echo "Font size optimizer function loop for small font sizes is taking too long. Terminating..."; break; fi
 				
 			done
 						
@@ -673,7 +673,7 @@ do
 	if [[ "$input_image_format" != "png" ]]
 	then
 
-		imgconv=$( echo $img | tr ".$input_image_format" ".png" )
+		imgconv=$( echo $img | sed 's/.'$input_image_format'/.png/' )
 		"$IMAGEMAGICKDIR"/convert.exe $img $imgconv
 		
 	else
@@ -983,12 +983,14 @@ do
 			
 			text=$(jq '.responses[0].fullTextAnnotation.pages[0].blocks['"$i"'].paragraphs[].words[].symbols[].text' ocrresponse.json | cut -d "\"" -f2)
 			
+			text=$(echo "$text" | sed 's/\*//g' | sed 's/\\n//g')
+			
 			rawstring=""
 			
 			k=1
 			for char in $text
 			do
-				if [[ "${breakpos[$k]}" == "SPACE" ]] && [[ $sourcelang == "ko" ]]
+				if [[ "${breakpos[$k]}" == "SPACE" ]] && ( [[ $sourcelang == "ko" ]] || [[ $sourcelang == "en" ]] )
 				then
 					rawstring+="$char "
 				else
@@ -998,6 +1000,7 @@ do
 			done
 
 			[[ $sourcelang == "ko" ]] && rawstring=$(echo ${rawstring::${#rawstring}-1})
+			[[ $sourcelang == "en" ]] && rawstring=$(echo ${rawstring::${#rawstring}-1})
 			
 			fetch_coordinates $(($i+1)) 1
 			
@@ -1048,9 +1051,9 @@ do
 			diffy2bny1bn=$(( $y2bn - $y1bn ))
 			diffy4bny3bn=$(( $y4bn - $y3bn ))
 
-			[[ $debug == 1 ]] && echo "Debug: [[ $x1bn != "null" ]] && [[ $y1bn != "null" ]] && [[ $x1bn -lt $x3b ]] && [[ $x3bn -gt $x1b ]] && ( ( [[ $x1bn -le $x1b ]] && [[ $x3bn -ge $x3b ]] ) || ( [[ $x1bn -ge $x1b ]] && [[ $x3bn -le $x3b ]] ) ) && [[ $y1bn -gt $y3b ]] && [[ $y1bn -lt $(( $y3b + (($y3b - $y1b) / $breakcont) )) ]] && [[ ${diffy2bny1bn/#-/} -lt 5 ]] && [[ ${diffy4bny3bn/#-/} -lt 5 ]]"
+			[[ $debug == 1 ]] && echo "Debug: [[ $x1bn != "null" ]] && [[ $y1bn != "null" ]] && [[ $x1bn -lt $x3b ]] && [[ $x3bn -gt $x1b ]] && ( ( [[ $x1bn -le $(( $x1b + 10 )) ]] && [[ $x3bn -ge $(( $x3b - 10 )) ]] ) || ( [[ $x1bn -ge $(( $x1b - 10 )) ]] && [[ $x3bn -le $(( $x3b + 10 )) ]] ) ) && [[ $y1bn -gt $y3b ]] && [[ $y1bn -lt $(( $y3b + (($y3b - $y1b) / $breakcont) )) ]] && [[ ${diffy2bny1bn/#-/} -lt 5 ]] && [[ ${diffy4bny3bn/#-/} -lt 5 ]]"
 
-			if [[ $x1bn != "null" ]] && [[ $y1bn != "null" ]] && [[ $x1bn -lt $x3b ]] && [[ $x3bn -gt $x1b ]] && ( ( [[ $x1bn -le $x1b ]] && [[ $x3bn -ge $x3b ]] ) || ( [[ $x1bn -ge $x1b ]] && [[ $x3bn -le $x3b ]] ) ) && [[ $y1bn -gt $y3b ]] && [[ $y1bn -lt $(( $y3b + (($y3b - $y1b) / $breakcont) )) ]] && [[ ${diffy2bny1bn/#-/} -lt 5 ]] && [[ ${diffy4bny3bn/#-/} -lt 5 ]] && [[ $sourcelang != "ja" ]]
+			if [[ $x1bn != "null" ]] && [[ $y1bn != "null" ]] && [[ $x1bn -lt $x3b ]] && [[ $x3bn -gt $x1b ]] && ( ( [[ $x1bn -le $(( $x1b + 10 )) ]] && [[ $x3bn -ge $(( $x3b - 10 )) ]] ) || ( [[ $x1bn -ge $(( $x1b - 10 )) ]] && [[ $x3bn -le $(( $x3b + 10 )) ]] ) ) && [[ $y1bn -gt $y3b ]] && [[ $y1bn -lt $(( $y3b + (($y3b - $y1b) / $breakcont) )) ]] && [[ ${diffy2bny1bn/#-/} -lt 5 ]] && [[ ${diffy4bny3bn/#-/} -lt 5 ]] && [[ $sourcelang != "ja" ]]
 			then
 				nextblockjoin=1
 				prevrawstring="$rawstring"
