@@ -1,6 +1,6 @@
 # Introduction
 
-A basic bash script that extracts raw text using Google Vision API from a list of manga or webtoon JPG images, translates the extracted raw text using Google Translate API or Deepl Translate API and typesets the result onto the images. 
+A basic bash script that extracts raw text using Google Vision API from a list of manga or webtoon images, translates the extracted raw text using Google Translate API or Deepl Translate API and typesets the result onto the images. 
 
 This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 (also works on WSL 2) installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided; you must obtain them yourself by creating free Google Cloud and Deepl accounts.
 
@@ -93,7 +93,7 @@ Add your google and your deepl api keys to the gc_api_key and deepl_api_key vari
 
 # Features
 
-The script takes a number of arguments, 3 of which are required. These are "Source Language", "Target Language" and "Translation Engine". Other arguments, such as "Mode", "Font", "Input-Image-Format", "Optimizations", "Translation File" and "Generate Read File" are optional. There are also two other special arguments, "Quietness" (-q|-qq|-qqq), "Advance Typeset Mode" (-a) and "Debug" (-d). Quietness is a value from 0 (default) to 3. The higher the value, the more output will be supressed. Advance Typeset Mode tries to find the edges of text bubbles and sets the offsets accordingly.
+The script takes a number of arguments, 3 of which are required. These are "Source Language", "Target Language" and "Translation Engine". Other arguments, such as "Mode", "Font", "Input-Image-Format", "Optimizations", "Translation File" and "Generate Read File" are optional. There are also three other special arguments, "Quietness" (-q|-qq|-qqq), "Advance Typeset Mode" (-a) and "Debug" (-d). Quietness is a value from 0 (default) to 3. The higher the value, the more output will be supressed. Advance Typeset Mode tries to find the edges of text bubbles and sets the offsets accordingly.
 
 The valid values for each of these are:
 
