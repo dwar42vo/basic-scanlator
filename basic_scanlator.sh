@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Original Author: Dwarvo Lasorsk
-# Current Revision: 20240621 (v0.11h)
+# Current Revision: 20240913 (v0.11j)
 
 # Prerequite Packages: apt-get install coreutils grep curl jq
 
@@ -17,7 +17,7 @@ deepl_api_key=""
 # Argument Parsing
 if [[ $# -eq 0 ]]
 then
-	echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( -r transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (-cc) (-a) (-g) (-q|-qq|-qqq) (-d)\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file, typeset-from-all\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
+	echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( -r transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (--wdiffx) (--wdiffy) (-cc) (-a) (-g) (-q|-qq|-qqq) (-d)\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file, typeset-from-all\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
 	exit 1
 fi
 
@@ -28,7 +28,7 @@ then
 		
 		-h|--help)
 			
-			echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( -r transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (-cc) (-a) (-g) (-q|-qq|-qqq) (-d)\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file, typeset-from-all\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
+			echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( -r transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (--wdiffx) (--wdiffy) (-cc) (-a) (-g) (-q|-qq|-qqq) (-d)\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file, typeset-from-all\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
 			exit 1
 			;;
 		
@@ -180,6 +180,16 @@ then
 				shift
 				remove_watermark_two_position=${1}
 				;;	
+				
+			--wdiffx)
+			
+				remove_watermark_diff_x=1
+				;;
+			
+			--wdiffy)
+			
+				remove_watermark_diff_y=1
+				;;
 			
 			-a|--advanced-typeset-box)
 			
@@ -801,8 +811,22 @@ do
 		imgheight=$("$IMAGEMAGICKDIR"/identify.exe -ping -format '%h' $imgconv)
 		
 		[[ $debug == 1 ]] && echo "Debug: Width: $imgwidth | Height: $imgheight"
-		if [[ $debug == 1 ]] && [[ $remove_watermark == 1 ]]; then echo "First Watermark: $remove_watermark_x, $remove_watermark_y, $remove_watermark_position"; fi
-		if [[ $debug == 1 ]] && [[ $remove_watermark_two == 1 ]]; then echo echo "Second Watermark: $remove_watermark_two_x, $remove_watermark_two_y, $remove_watermark_two_position"; fi
+		
+		remove_watermark_x_orig=$remove_watermark_x
+		remove_watermark_y_orig=$remove_watermark_y
+		remove_watermark_two_x_orig=$remove_watermark_two_x
+		remove_watermark_two_y_orig=$remove_watermark_two_y
+		
+		if [[ $remove_watermark_diff_x == 1 ]] && [[ $remove_watermark == 1 ]]; then remove_watermark_x=$(( $imgheight - $remove_watermark_x )); fi
+		
+		if [[ $remove_watermark_diff_x == 1 ]] && [[ $remove_watermark_two == 1 ]]; then remove_watermark_two_x=$(( $imgwidth - $remove_watermark_two_x )); fi
+		
+		if [[ $remove_watermark_diff_y == 1 ]] && [[ $remove_watermark == 1 ]]; then remove_watermark_y=$(( $imgheight - $remove_watermark_y )); fi
+		
+		if [[ $remove_watermark_diff_y == 1 ]] && [[ $remove_watermark_two == 1 ]]; then remove_watermark_two_y=$(( $imgheight - $remove_watermark_two_y )); fi
+		
+		if [[ $debug == 1 ]] && [[ $remove_watermark == 1 ]]; then echo "Debug: First Watermark: $remove_watermark_x, $remove_watermark_y, $remove_watermark_position"; fi
+		if [[ $debug == 1 ]] && [[ $remove_watermark_two == 1 ]]; then echo "Debug: Second Watermark: $remove_watermark_two_x, $remove_watermark_two_y, $remove_watermark_two_position"; fi
 		
 		if [[ $remove_watermark == 1 ]]
 		then
@@ -814,11 +838,16 @@ do
 		
 		if [[ $remove_watermark_two == 1 ]]
 		then
-			[[ $remove_watermark_position == "tl" ]] && "$IMAGEMAGICKDIR"/convert.exe watercls_$imgconv -fill white -draw "rectangle 0,0 $remove_watermark_two_x,$remove_watermark_two_y" watercls_$imgconv
-			[[ $remove_watermark_position == "tr" ]] && "$IMAGEMAGICKDIR"/convert.exe watercls_$imgconv -fill white -draw "rectangle $remove_watermark_two_x,0 $imgwidth,$remove_watermark_two_y" watercls_$imgconv
-			[[ $remove_watermark_position == "bl" ]] && "$IMAGEMAGICKDIR"/convert.exe watercls_$imgconv -fill white -draw "rectangle 0,$remove_watermark_two_y $remove_watermark_two_x,$imgheight" watercls_$imgconv
-			[[ $remove_watermark_position == "br" ]] && "$IMAGEMAGICKDIR"/convert.exe watercls_$imgconv -fill white -draw "rectangle $remove_watermark_two_x,$remove_watermark_two_y $imgwidth,$imgheight" watercls_$imgconv
+			[[ $remove_watermark_two_position == "tl" ]] && "$IMAGEMAGICKDIR"/convert.exe watercls_$imgconv -fill white -draw "rectangle 0,0 $remove_watermark_two_x,$remove_watermark_two_y" watercls_$imgconv
+			[[ $remove_watermark_two_position == "tr" ]] && "$IMAGEMAGICKDIR"/convert.exe watercls_$imgconv -fill white -draw "rectangle $remove_watermark_two_x,0 $imgwidth,$remove_watermark_two_y" watercls_$imgconv
+			[[ $remove_watermark_two_position == "bl" ]] && "$IMAGEMAGICKDIR"/convert.exe watercls_$imgconv -fill white -draw "rectangle 0,$remove_watermark_two_y $remove_watermark_two_x,$imgheight" watercls_$imgconv
+			[[ $remove_watermark_two_position == "br" ]] && "$IMAGEMAGICKDIR"/convert.exe watercls_$imgconv -fill white -draw "rectangle $remove_watermark_two_x,$remove_watermark_two_y $imgwidth,$imgheight" watercls_$imgconv
 		fi
+		
+		[[ $remove_watermark_diff_x == 1 ]] && remove_watermark_x=$remove_watermark_x_orig
+		[[ $remove_watermark_diff_y == 1 ]] && remove_watermark_y=$remove_watermark_y_orig
+		[[ $remove_watermark_diff_x == 1 ]] && remove_watermark_two_x=$remove_watermark_two_x_orig
+		[[ $remove_watermark_diff_y == 1 ]] && remove_watermark_two_y=$remove_watermark_two_y_orig
 
 		# OCR Request
 		[[ $remove_watermark == 1 ]] && base64 watercls_$imgconv > $imgconv.txt || base64 $imgconv > $imgconv.txt
@@ -1341,7 +1370,16 @@ do
 				if [[ $mode == "interactive" ]] || [[ $mode == "interactive-typeset-from-file" ]]
 				then
 			
-					read -e -p "Type edited translated string or press enter to typeset current translated string... " string
+					read -e -p "Type edited translated string, type skip or press enter to typeset current translated string... " string
+					
+					if [[ "$string" == "skip" ]]
+					then
+						sleep 1
+						cp $imgconvtmp $imgconv
+						i=$(($i+1))
+						echo "Skipping edited translated string as per user request."
+						break 2
+					fi
 			
 					if [[ "$string" != "" ]]
 					then
