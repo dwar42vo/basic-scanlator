@@ -2,25 +2,23 @@
 
 A basic bash script that extracts raw text using Google Vision API from a list of manga or webtoon images, translates the extracted raw text using Google Translate API or Deepl Translate API and typesets the result onto the images. 
 
-This script is meant to be run on Windows 10's WSL 1 with Ubuntu 18.04 or 20.04 (also works on WSL 2) installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided; you must obtain them yourself by creating free Google Cloud and Deepl accounts.
+This script is meant to be run on Windows 10's WSL 1 or WSL 2 with Ubuntu 18.04+ installed, the latest Cygwin or on the latest MobaXterm. It can also be run on Linux distros with a few minor code changes. The API keys are not provided. You must obtain them yourself by creating free Google Cloud and Deepl accounts.
 
 This script only supports Japanese, Chinese and Korean as source languages. The default font used by this script is Arial, but you can change it to any font you have installed on your system. 
-
-Lastly, this script is a WIP. Unintended results are to be expected.
 
 # Prerequisites
 
 ## Operating System
 
-WSL with Ubuntu 18.04 or 20.04 installed, [Cywin](https://www.cygwin.com/) [setup-x86_64.exe] or [MobaXterm](https://mobaxterm.mobatek.net/download-home-edition.html) [MobaXterm_Installer_v22.1.zip]
+WSL with Ubuntu 18.04+ installed, [Cywin](https://www.cygwin.com/) or [MobaXterm](https://mobaxterm.mobatek.net/download-home-edition.html)
 
 [CC Wild Words](https://freefontsfamily.com/cc-wild-words-roman-font-free/) [CC Wild Words Roman.ttf]
 
-[ImageMagick v7+](https://imagemagick.org/script/download.php) [ImageMagick-7.1.0-portable-Q16-x64.zip]
+[ImageMagick v7+](https://imagemagick.org/script/download.php) [ImageMagick-7.0.11-14-Q16-HDRI-x64-dll.exe]
 
-[JPEGView](https://sourceforge.net/projects/jpegview/files/latest/download) [JPEGView_1.0.37.zip]
+[JPEGView](https://sourceforge.net/projects/jpegview/files/latest/download)
 
-These last two should be installed on C:\Program Files. JPEGView is optional if quietness is set to a value between 1 and 3.
+These last two should be installed on C:\Program Files. Any fonts need to be installed for all users. JPEGView is optional if quietness is set to a value between 1 and 3.
 
 ## Command Line
 
