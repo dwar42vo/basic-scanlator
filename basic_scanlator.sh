@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Original Author: Dwarvo Lasorsk
-# Current Revision: 20240913 (v0.11j)
+# Current Revision: 20250915 (v0.11k)
 
 # Prerequite Packages: apt-get install coreutils grep curl jq
 
@@ -14,10 +14,13 @@ CMDDIR="/mnt/c/Windows/System32"
 gc_api_key=""
 deepl_api_key=""
 
+# Other Declarations
+glossary_id=""
+
 # Argument Parsing
 if [[ $# -eq 0 ]]
 then
-	echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( -r transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (--wdiffx) (--wdiffy) (-cc) (-a) (-g) (-q|-qq|-qqq) (-d)\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file, typeset-from-all\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
+	echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( --transfile transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (--wdiffx) (--wdiffy) (-cc) (-a) (-r) (-g) (-tt) (-q|-qq|-qqq) (-d)\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file, typeset-from-all\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
 	exit 1
 fi
 
@@ -28,7 +31,7 @@ then
 		
 		-h|--help)
 			
-			echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( -r transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (--wdiffx) (--wdiffy) (-cc) (-a) (-g) (-q|-qq|-qqq) (-d)\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file, typeset-from-all\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
+			echo -e "Usage:\n\t${0} [ -s source_language ] [ -t target_language ] [ -e translation_engine ] ( -m mode ) ( -i image_format ) ( --transfile transfile ) ( -o manga|webtoon ) ( -f font ) ( --fmin size ) ( --fmax size ) ( --fcolor color ) ( -c color ) (-w posx,posy) (--w1p tl|tr|bl|br) (-ww posx2,posy2) (--w2p tl|tr|bl|br) (--wdiffx) (--wdiffy) (-cc) (-a) (-r) (-g) (-tt) (-q|-qq|-qqq) (-d)\n\n\tAvailable Source Languages: jp, zh, ko\n\n\tAvailable Translation Engines: google, deepl\n\n\tAvailable Operation Modes: automatic (default), interactive, ocr-only, no-typeset, typeset-from-file, interactive-typeset-from-file, typeset-from-all\n\n\tAvailable Optimizations: webtoon (default), manga\n\n\tAvailable Input Formats: jpg (default), png, webp\n"
 			exit 1
 			;;
 		
@@ -105,7 +108,7 @@ then
 				input_image_format=${1}
 				;;	
 				
-			-r|--transfile)
+			--transfile)
 				
 				shift
 				transfile=${1}
@@ -196,9 +199,19 @@ then
 				advanced_typeset_box_calc=1
 				;;
 				
-			-g|--generate-read-file)
+			-r|--generate-read-file)
 			
 				generate_read_file=1
+				;;
+				
+			-g|--use-glossary)
+			
+				use_glossary=1
+				;;
+				
+			-tt|--new-lang-model)   
+					  
+				new_lang_model=1
 				;;
 			
 			-q)
@@ -431,11 +444,18 @@ then
 	exit 2
 fi
 
-#if [[ $sourcelang == "ko" ]] && [[ $transengine == "deepl" ]]
-#then
-#	echo "Deepl does not currently support Korean language."
-#	exit 2
-#fi
+if [[ $transengine != "deepl" ]] && [[ $new_lang_model == 1 ]]
+then
+	echo "Next generation language model only available for Deepl."
+	exit 2
+fi
+
+if [[ $new_lang_model == 1 ]]
+then
+	lang_model="prefer_quality_optimized"
+else
+	lang_model="latency_optimized"
+fi
 
 if [[ $mode == "typeset-from-file" ]] || [[ $mode == "interactive-typeset-from-file" ]]
 then
@@ -751,7 +771,7 @@ do
 			fontstrokewidth="0"
 			clean_fill_color=$( head -n +$(($transstringcount+2)) all.txt | tail -n -1 | awk -F "|" '{print $4}'| cut -d ":" -f2 | tr -d " " )
 			
-			transstring=$( head -n +$(($transstringcount+4)) all.txt | tail -n -1 | awk -F ":" '{print $2}' | cut -c 2- )
+			transstring=$( head -n +$(($transstringcount+4)) all.txt | tail -n -1 | awk -F "string:" '{print $2}' | cut -c 2- )
 			
 			[[ $debug == 1 ]] && echo "Debug: $x1b $x2b $x3b $x4b - $y1b $y2b $y3b $y4b | $x1boffset $x3boffset - $y1boffset $y3boffset"
 			[[ $debug == 1 ]] && echo "Debug: $font | $fontsize | $fontcolor | $clean_fill_color"
@@ -856,7 +876,7 @@ do
 
 		[[ $quietness -lt 3 ]] && echo "OCRing image... "
 
-		curl -s -X POST -H "X-Goog-Api-Key: $gc_api_key" -H "Content-Type: application/json; charset=utf-8" -d @ocrresquest.json "https://vision.googleapis.com/v1/images:annotate" > ocrresponse.json
+		curl -s -k -X POST -H "X-Goog-Api-Key: $gc_api_key" -H "Content-Type: application/json; charset=utf-8" -d @ocrresquest.json "https://vision.googleapis.com/v1/images:annotate" > ocrresponse.json
 
 		[[ -f watercls_$imgconv ]] && rm watercls_$imgconv
 		[[ -f $imgconv.txt ]] && rm $imgconv.txt
@@ -1166,7 +1186,7 @@ do
 				
 					echo -e "{\n \"q\": \"$rawstring\",\n \"source\": \"$sourcelang\",\n \"target\": \"$targetlang\",\n \"format\": \"text\"\n}" > transresquest.json
 					[[ $quietness -lt 3 ]] && echo "Translating raw string... "
-					transstring=$(curl -s -X POST -H "X-Goog-Api-Key: $gc_api_key" -H "Content-Type: application/json; charset=utf-8" -d @transresquest.json "https://translation.googleapis.com/language/translate/v2" | jq '.data.translations[].translatedText' | sed 's/\"//g' | sed 's/\\//g')
+					transstring=$(curl -s -k -X POST -H "X-Goog-Api-Key: $gc_api_key" -H "Content-Type: application/json; charset=utf-8" -d @transresquest.json "https://translation.googleapis.com/language/translate/v2" | jq '.data.translations[].translatedText' | sed 's/\"//g' | sed 's/\\//g')
 					echo "$transstring" >> autotranstext.txt
 					
 					if [[ $transstring == "" ]] || [[ $transtring =~ "[[:space:]]*" ]]
@@ -1218,7 +1238,12 @@ do
 				else
 				
 					[[ $quietness -lt 3 ]] && echo "Translating raw string... "
-					transstring=$(curl -s "https://api-free.deepl.com/v2/translate" -d "auth_key=$deepl_api_key" -d "text=$rawstring" -d "source_lang=$sourcelang" -d "target_lang=$targetlang" | jq '.translations[].text' | sed 's/\"//g' | sed 's/\\//g')
+					if [[ $use_glossary == 1 ]]
+					then
+						transstring=$(curl -s -k "https://api-free.deepl.com/v2/translate" -d "auth_key=$deepl_api_key" -d "text=$rawstring" -d "source_lang=$sourcelang" -d "target_lang=$targetlang" -d "model_type=$lang_model" -d "glossary_id=$glossary_id" | jq '.translations[].text' | sed 's/\"//g' | sed 's/\\//g')
+					else
+						transstring=$(curl -s -k "https://api-free.deepl.com/v2/translate" -d "auth_key=$deepl_api_key" -d "text=$rawstring" -d "source_lang=$sourcelang" -d "target_lang=$targetlang" -d "model_type=$lang_model" | jq '.translations[].text' | sed 's/\"//g' | sed 's/\\//g')
+					fi
 					echo "$transstring" >> autotranstext.txt
 					
 					if [[ $transstring == "" ]] || [[ $transtring =~ "[[:space:]]*" ]]
