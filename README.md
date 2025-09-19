@@ -119,7 +119,7 @@ The valid values for each of these are:
     
     - Typeset from All: Uses a text file named all.txt for the translated text, bounding box coordinates and offsets, font name, font size, font color and text bubble clean color.
         
-    - Interactive Typeset from File: A combination of "Interactive" and "Typeset from file".
+    - Interactive Typeset from File: A combination of "Interactive" and "Typeset from File".
 
 # Usage
 
